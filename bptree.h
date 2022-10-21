@@ -1,12 +1,20 @@
+#include <vector>
+#include "shrinkingcone_segmentation.h"
+#include "algorithm"
+
 int MAX = 3;
+const int BUFFER_SIZE = 20;
 
 // BP node
 class Node {
-    bool IS_LEAF;
-    int *key, size;
-    Node **ptr;
-    Segment seg;
-    friend class BPTree;
+  bool IS_LEAF;
+  int *key, size;
+  Node **ptr;
+  int start; // 起始key
+  double slope;
+  std::vector<int> data;
+  std::vector<int> buffer;
+  friend class BPTree;
 
 public:
     Node();
@@ -17,6 +25,7 @@ class BPTree {
     Node *root;
     void insertInternal(int, Node *, Node *);
     Node *findParent(Node *, Node *);
+    std::vector<int> data;
 
 public:
     BPTree();
@@ -53,14 +62,39 @@ void BPTree::search(int x) {
         }
       }
     }
-    for (int i = 0; i < cursor->size; i++) {
-      if (cursor->key[i] == x) {
-        cout << "Found\n";
-        return;
-      }
+    // 进入到叶子节点中，使用Segment算法
+    int pos = cursor->slope * (x - cursor->start);
+    int l_bound = pos - ERROR;
+    int r_bound = pos + ERROR;
+    int pos = std::lower_bound(data.begin() + l_bound, data.begin() + r_bound, x);
+    if (data[pos] == x) {
+      cout << "Found\n";
     }
-    cout << "Not found\n";
+    else {
+      cout << "Not found\n";
+    }
+//    for (int i = 0; i < cursor->size; i++) {
+//      if (cursor->key[i] == x) {
+//        cout << "Found\n";
+//        return;
+//      }
+//    }
+//    cout << "Not found\n";
   }
+}
+
+void Node::insert_buffer(int key) {
+  int i = size - 1;
+  while (i >= 0 && buffer[i] > key) {
+    buffer[i + 1] = buffer[i];
+    i -= 1;
+  }
+  buffer[i + 1] = key;
+  size += 1;
+}
+
+bool Node::is_buffer_full() {
+  return size == BUFFER_SIZE;
 }
 
 // Insert Operation
@@ -86,6 +120,19 @@ void BPTree::insert(int x) {
         }
       }
     }
+    // 抵达leaf nodes
+    cursor->insert_buffer(x);
+    if (cursor->is_buffer_full()) {
+      Segment segs = shrinkingcore_segmentation(cursor->data, cursor->buffer);
+      for (Segment seg : segs) {
+        // tree.insert(seg)
+
+      }
+      // tree.remove(cursor)
+
+    }
+
+
     if (cursor->size < MAX) {
       int i = 0;
       while (x > cursor->key[i] && i < cursor->size)

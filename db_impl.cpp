@@ -4,21 +4,7 @@
 
 #include "db_impl.h"
 
-class Segment {
-private:
-  std::vector<int> data;
-  int start; // 起始key
-  double slope;
-  std::vector<int> buffer;
-public:
-  Segment() {
 
-  }
-
-  ~Segment() {
-
-  }
-};
 
 int get(tree, int key) {
   seg = search_tree(tree.root, key);
