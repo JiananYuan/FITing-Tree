@@ -35,6 +35,8 @@ public:
     void insert(int);
     void display(Node *);
     Node *getRoot();
+    void insert_buffer(int key);
+    bool is_buffer_full();
 };
 
 Node::Node() {
@@ -68,7 +70,7 @@ void BPTree::search(int x) {
     int pos = cursor->slope * (x - cursor->start);
     int l_bound = pos - ERROR;
     int r_bound = pos + ERROR;
-    int pos = std::lower_bound(data.begin() + l_bound, data.begin() + r_bound, x);
+    pos = std::lower_bound(data.begin() + l_bound, data.begin() + r_bound, x);
     if (data[pos] == x) {
       cout << "Found\n";
     }
@@ -126,7 +128,7 @@ void BPTree::insert(int x) {
     // cursor: Segment节点
     cursor->insert_buffer(x);
     if (cursor->is_buffer_full()) {
-      Segment segs = shrinkingcore_segmentation(cursor->data, cursor->buffer);
+      vector<Segment> segs = shrinkingcore_segmentation(cursor->data, cursor->buffer);
       for (Segment seg : segs) {
         // tree.insert(seg)
         Node *newNode = new Node;

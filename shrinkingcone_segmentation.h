@@ -26,7 +26,7 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vect
   std::vector<Segment> segs;
   for (int i = 1; i < keys.size(); i += 1) {
     double k_up = keys[i] + ERROR;
-    double l_low = keys[i] - ERROR;
+    double k_low = keys[i] - ERROR;
     double max_bound = sl_high * keys[i];
     double min_bound = sl_low * keys[i];
     if (keys[i] >= min_bound && keys[i] <= max_bound) {

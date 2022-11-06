@@ -4,7 +4,7 @@
 
 #include "bptree.h"
 
-fiting_tree = new BPTree;
+BPTree* fiting_tree = new BPTree;
 
 int get(int x) {
   fiting_tree -> search(x);
