@@ -20,6 +20,8 @@ class Node {
 
 public:
     Node();
+    void insert_buffer(int);
+    bool is_buffer_full();
 };
 
 // BP tree
@@ -35,8 +37,6 @@ public:
     void insert(int);
     void display(Node *);
     Node *getRoot();
-    void insert_buffer(int key);
-    bool is_buffer_full();
 };
 
 Node::Node() {
@@ -70,7 +70,7 @@ void BPTree::search(int x) {
     int pos = cursor->slope * (x - cursor->start);
     int l_bound = pos - ERROR;
     int r_bound = pos + ERROR;
-    pos = std::lower_bound(data.begin() + l_bound, data.begin() + r_bound, x);
+    pos = std::lower_bound(data.begin() + l_bound, data.begin() + r_bound, x) - data.begin();
     if (data[pos] == x) {
       cout << "Found\n";
     }

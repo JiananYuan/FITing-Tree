@@ -6,10 +6,10 @@
 
 BPTree* fiting_tree = new BPTree;
 
-int get(int x) {
+void get(int x) {
   fiting_tree -> search(x);
 }
 
-int insert(int x) {
+void insert(int x) {
   fiting_tree -> insert(x);
 }
