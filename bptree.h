@@ -1,8 +1,10 @@
 #include <vector>
 #include "shrinkingcone_segmentation.h"
 #include "algorithm"
+#include <iostream>
+using namespace std;
 
-int MAX = 3;
+const int MAX = 3;
 const int BUFFER_SIZE = 20;
 
 // BP node
@@ -83,7 +85,7 @@ void BPTree::search(int x) {
   }
 }
 
-void Node::insert_buffer(int key) {
+void Node::insert_buffer(int key) {  // 1 2 4 5  <-- (3)
   int i = size - 1;
   while (i >= 0 && buffer[i] > key) {
     buffer[i + 1] = buffer[i];
@@ -121,66 +123,72 @@ void BPTree::insert(int x) {
       }
     }
     // 抵达leaf nodes
+    // cursor: Segment节点
     cursor->insert_buffer(x);
     if (cursor->is_buffer_full()) {
       Segment segs = shrinkingcore_segmentation(cursor->data, cursor->buffer);
       for (Segment seg : segs) {
         // tree.insert(seg)
-
+        Node *newNode = new Node;
+        newNode->slope = seg.slope;
+        newNode->start = seg.start;
+        newNode->key[0] = seg.start;
+        newNode->IS_LEAF = true;
+        insertInternal(seg.start, parent, newNode);
       }
       // tree.remove(cursor)
-
+      delete cursor;
     }
 
 
-    if (cursor->size < MAX) {
-      int i = 0;
-      while (x > cursor->key[i] && i < cursor->size)
-        i++;
-      for (int j = cursor->size; j > i; j--) {
-        cursor->key[j] = cursor->key[j - 1];
-      }
-      cursor->key[i] = x;
-      cursor->size++;
-      cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
-      cursor->ptr[cursor->size - 1] = NULL;
-    } else {
-      Node *newLeaf = new Node;
-      int virtualNode[MAX + 1];
-      for (int i = 0; i < MAX; i++) {
-        virtualNode[i] = cursor->key[i];
-      }
-      int i = 0, j;
-      while (x > virtualNode[i] && i < MAX)
-        i++;
-      for (int j = MAX + 1; j > i; j--) {
-        virtualNode[j] = virtualNode[j - 1];
-      }
-      virtualNode[i] = x;
-      newLeaf->IS_LEAF = true;
-      cursor->size = (MAX + 1) / 2;
-      newLeaf->size = MAX + 1 - (MAX + 1) / 2;
-      cursor->ptr[cursor->size] = newLeaf;
-      newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
-      cursor->ptr[MAX] = NULL;
-      for (i = 0; i < cursor->size; i++) {
-        cursor->key[i] = virtualNode[i];
-      }
-      for (i = 0, j = cursor->size; i < newLeaf->size; i++, j++) {
-        newLeaf->key[i] = virtualNode[j];
-      }
-      if (cursor == root) {
-        Node *newRoot = new Node;
-        newRoot->key[0] = newLeaf->key[0];
-        newRoot->ptr[0] = cursor;
-        newRoot->ptr[1] = newLeaf;
-        newRoot->IS_LEAF = false;
-        newRoot->size = 1;
-        root = newRoot;
-      } else {
-        insertInternal(newLeaf->key[0], parent, newLeaf);
-      }
-    }
+//    if (cursor->size < MAX) {
+//      int i = 0;
+//      while (x > cursor->key[i] && i < cursor->size)
+//        i++;
+//      for (int j = cursor->size; j > i; j--) {
+//        cursor->key[j] = cursor->key[j - 1];
+//      }
+//      cursor->key[i] = x;
+//      cursor->size++;
+//      cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
+//      cursor->ptr[cursor->size - 1] = NULL;
+//    } else {
+//      Node *newLeaf = new Node;
+//      int virtualNode[MAX + 1];
+//      for (int i = 0; i < MAX; i++) {
+//        virtualNode[i] = cursor->key[i];
+//      }
+//      int i = 0, j;
+//      while (x > virtualNode[i] && i < MAX)
+//        i++;
+//      for (int j = MAX + 1; j > i; j--) {
+//        virtualNode[j] = virtualNode[j - 1];
+//      }
+//      virtualNode[i] = x;
+//      newLeaf->IS_LEAF = true;
+//      cursor->size = (MAX + 1) / 2;
+//      newLeaf->size = MAX + 1 - (MAX + 1) / 2;
+//      cursor->ptr[cursor->size] = newLeaf;
+//      newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
+//      cursor->ptr[MAX] = NULL;
+//      for (i = 0; i < cursor->size; i++) {
+//        cursor->key[i] = virtualNode[i];
+//      }
+//      for (i = 0, j = cursor->size; i < newLeaf->size; i++, j++) {
+//        newLeaf->key[i] = virtualNode[j];
+//      }
+//      if (cursor == root) {
+//        Node *newRoot = new Node;
+//        newRoot->key[0] = newLeaf->key[0];
+//        newRoot->ptr[0] = cursor;
+//        newRoot->ptr[1] = newLeaf;
+//        newRoot->IS_LEAF = false;
+//        newRoot->size = 1;
+//        root = newRoot;
+//      } else {
+//        insertInternal(newLeaf->key[0], parent, newLeaf);
+//      }
+//    }
   }
 }
 
@@ -260,21 +268,6 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
     }
   }
   return parent;
-}
-
-// Print the tree
-void BPTree::display(Node *cursor) {
-  if (cursor != NULL) {
-    for (int i = 0; i < cursor->size; i++) {
-      cout << cursor->key[i] << " ";
-    }
-    cout << "\n";
-    if (cursor->IS_LEAF != true) {
-      for (int i = 0; i < cursor->size + 1; i++) {
-        display(cursor->ptr[i]);
-      }
-    }
-  }
 }
 
 // Get the root

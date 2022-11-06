@@ -2,7 +2,14 @@
 // Created by Jiananyuan on 2022/10/19.
 //
 
-#ifndef INDEX_HOMEWORK_DB_IMPL_H
-#define INDEX_HOMEWORK_DB_IMPL_H
+#include "bptree.h"
 
-#endif //INDEX_HOMEWORK_DB_IMPL_H
+fiting_tree = new BPTree;
+
+int get(int x) {
+  fiting_tree -> search(x);
+}
+
+int insert(int x) {
+  fiting_tree -> insert(x);
+}
