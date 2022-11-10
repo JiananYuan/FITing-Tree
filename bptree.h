@@ -37,6 +37,7 @@ public:
 Node::Node() {
   key = new int[config::MAX];
   ptr = new Node *[config::MAX + 1];
+  buffer.resize(config::BUFFER_SIZE);
 }
 
 BPTree::BPTree() {
