@@ -1,11 +1,9 @@
 #include <vector>
 #include "shrinkingcone_segmentation.h"
-#include "algorithm"
+#include <algorithm>
 #include <iostream>
+#include "config.h"
 using namespace std;
-
-const int MAX = 3;
-const int BUFFER_SIZE = 20;
 
 // BP node
 class Node {
@@ -29,19 +27,16 @@ class BPTree {
     Node *root;
     void insertInternal(int, Node *, Node *);
     Node *findParent(Node *, Node *);
-    std::vector<int> data;
 
 public:
     BPTree();
-    void search(int);
-    void insert(int);
-    void display(Node *);
-    Node *getRoot();
+    State search(int);
+    State insert(int);
 };
 
 Node::Node() {
-  key = new int[MAX];
-  ptr = new Node *[MAX + 1];
+  key = new int[config::MAX];
+  ptr = new Node *[config::MAX + 1];
 }
 
 BPTree::BPTree() {
@@ -49,9 +44,10 @@ BPTree::BPTree() {
 }
 
 // Search operation
-void BPTree::search(int x) {
+State BPTree::search(int x) {
   if (root == NULL) {
     cout << "Tree is empty\n";
+    return State::SUCCESS;
   } else {
     Node *cursor = root;
     while (cursor->IS_LEAF == false) {
@@ -68,14 +64,11 @@ void BPTree::search(int x) {
     }
     // 进入到叶子节点中，使用Segment算法
     int pos = cursor->slope * (x - cursor->start);
-    int l_bound = pos - ERROR;
-    int r_bound = pos + ERROR;
-    pos = std::lower_bound(data.begin() + l_bound, data.begin() + r_bound, x) - data.begin();
-    if (data[pos] == x) {
-      cout << "Found\n";
-    }
-    else {
-      cout << "Not found\n";
+    int l_bound = pos - config::ERROR;
+    int r_bound = pos + config::ERROR;
+    pos = std::lower_bound(cursor->data.begin() + l_bound, cursor->data.begin() + r_bound, x) - cursor->data.begin();
+    if (cursor->data[pos] == x) {
+      return State::SUCCESS;
     }
 //    for (int i = 0; i < cursor->size; i++) {
 //      if (cursor->key[i] == x) {
@@ -85,6 +78,7 @@ void BPTree::search(int x) {
 //    }
 //    cout << "Not found\n";
   }
+  return State::FAIL;
 }
 
 void Node::insert_buffer(int key) {  // 1 2 4 5  <-- (3)
@@ -98,16 +92,16 @@ void Node::insert_buffer(int key) {  // 1 2 4 5  <-- (3)
 }
 
 bool Node::is_buffer_full() {
-  return size == BUFFER_SIZE;
+  return size == config::BUFFER_SIZE;
 }
 
 // Insert Operation
-void BPTree::insert(int x) {
-  if (root == NULL) {
+State BPTree::insert(int x) {
+  try {
+    if (root == NULL) {
     root = new Node;
-    root->key[0] = x;
+    root -> insert_buffer(x);
     root->IS_LEAF = true;
-    root->size = 1;
   } else {
     Node *cursor = root;
     Node *parent;
@@ -134,7 +128,6 @@ void BPTree::insert(int x) {
         Node *newNode = new Node;
         newNode->slope = seg.slope;
         newNode->start = seg.start;
-        newNode->key[0] = seg.start;
         newNode->IS_LEAF = true;
         insertInternal(seg.start, parent, newNode);
       }
@@ -143,60 +136,65 @@ void BPTree::insert(int x) {
     }
 
 
-//    if (cursor->size < MAX) {
-//      int i = 0;
-//      while (x > cursor->key[i] && i < cursor->size)
-//        i++;
-//      for (int j = cursor->size; j > i; j--) {
-//        cursor->key[j] = cursor->key[j - 1];
-//      }
-//      cursor->key[i] = x;
-//      cursor->size++;
-//      cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
-//      cursor->ptr[cursor->size - 1] = NULL;
-//    } else {
-//      Node *newLeaf = new Node;
-//      int virtualNode[MAX + 1];
-//      for (int i = 0; i < MAX; i++) {
-//        virtualNode[i] = cursor->key[i];
-//      }
-//      int i = 0, j;
-//      while (x > virtualNode[i] && i < MAX)
-//        i++;
-//      for (int j = MAX + 1; j > i; j--) {
-//        virtualNode[j] = virtualNode[j - 1];
-//      }
-//      virtualNode[i] = x;
-//      newLeaf->IS_LEAF = true;
-//      cursor->size = (MAX + 1) / 2;
-//      newLeaf->size = MAX + 1 - (MAX + 1) / 2;
-//      cursor->ptr[cursor->size] = newLeaf;
-//      newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
-//      cursor->ptr[MAX] = NULL;
-//      for (i = 0; i < cursor->size; i++) {
-//        cursor->key[i] = virtualNode[i];
-//      }
-//      for (i = 0, j = cursor->size; i < newLeaf->size; i++, j++) {
-//        newLeaf->key[i] = virtualNode[j];
-//      }
-//      if (cursor == root) {
-//        Node *newRoot = new Node;
-//        newRoot->key[0] = newLeaf->key[0];
-//        newRoot->ptr[0] = cursor;
-//        newRoot->ptr[1] = newLeaf;
-//        newRoot->IS_LEAF = false;
-//        newRoot->size = 1;
-//        root = newRoot;
-//      } else {
-//        insertInternal(newLeaf->key[0], parent, newLeaf);
-//      }
-//    }
+    //    if (cursor->size < MAX) {
+    //      int i = 0;
+    //      while (x > cursor->key[i] && i < cursor->size)
+    //        i++;
+    //      for (int j = cursor->size; j > i; j--) {
+    //        cursor->key[j] = cursor->key[j - 1];
+    //      }
+    //      cursor->key[i] = x;
+    //      cursor->size++;
+    //      cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
+    //      cursor->ptr[cursor->size - 1] = NULL;
+    //    } else {
+    //      Node *newLeaf = new Node;
+    //      int virtualNode[MAX + 1];
+    //      for (int i = 0; i < MAX; i++) {
+    //        virtualNode[i] = cursor->key[i];
+    //      }
+    //      int i = 0, j;
+    //      while (x > virtualNode[i] && i < MAX)
+    //        i++;
+    //      for (int j = MAX + 1; j > i; j--) {
+    //        virtualNode[j] = virtualNode[j - 1];
+    //      }
+    //      virtualNode[i] = x;
+    //      newLeaf->IS_LEAF = true;
+    //      cursor->size = (MAX + 1) / 2;
+    //      newLeaf->size = MAX + 1 - (MAX + 1) / 2;
+    //      cursor->ptr[cursor->size] = newLeaf;
+    //      newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
+    //      cursor->ptr[MAX] = NULL;
+    //      for (i = 0; i < cursor->size; i++) {
+    //        cursor->key[i] = virtualNode[i];
+    //      }
+    //      for (i = 0, j = cursor->size; i < newLeaf->size; i++, j++) {
+    //        newLeaf->key[i] = virtualNode[j];
+    //      }
+    //      if (cursor == root) {
+    //        Node *newRoot = new Node;
+    //        newRoot->key[0] = newLeaf->key[0];
+    //        newRoot->ptr[0] = cursor;
+    //        newRoot->ptr[1] = newLeaf;
+    //        newRoot->IS_LEAF = false;
+    //        newRoot->size = 1;
+    //        root = newRoot;
+    //      } else {
+    //        insertInternal(newLeaf->key[0], parent, newLeaf);
+    //      }
+    //    }
+      }
+  } catch (exception e) {
+    cout << e.what() << "\n";
+    return State::FAIL;
   }
+  return State::SUCCESS;
 }
 
 // Insert Operation
 void BPTree::insertInternal(int x, Node *cursor, Node *child) {
-  if (cursor->size < MAX) {
+  if (cursor->size < config::MAX) {
     int i = 0;
     while (x > cursor->key[i] && i < cursor->size)
       i++;
@@ -211,28 +209,28 @@ void BPTree::insertInternal(int x, Node *cursor, Node *child) {
     cursor->ptr[i + 1] = child;
   } else {
     Node *newInternal = new Node;
-    int virtualKey[MAX + 1];
-    Node *virtualPtr[MAX + 2];
-    for (int i = 0; i < MAX; i++) {
+    int virtualKey[config::MAX + 1];
+    Node *virtualPtr[config::MAX + 2];
+    for (int i = 0; i < config::MAX; i++) {
       virtualKey[i] = cursor->key[i];
     }
-    for (int i = 0; i < MAX + 1; i++) {
+    for (int i = 0; i < config::MAX + 1; i++) {
       virtualPtr[i] = cursor->ptr[i];
     }
     int i = 0, j;
-    while (x > virtualKey[i] && i < MAX)
+    while (x > virtualKey[i] && i < config::MAX)
       i++;
-    for (int j = MAX + 1; j > i; j--) {
+    for (int j = config::MAX + 1; j > i; j--) {
       virtualKey[j] = virtualKey[j - 1];
     }
     virtualKey[i] = x;
-    for (int j = MAX + 2; j > i + 1; j--) {
+    for (int j = config::MAX + 2; j > i + 1; j--) {
       virtualPtr[j] = virtualPtr[j - 1];
     }
     virtualPtr[i + 1] = child;
     newInternal->IS_LEAF = false;
-    cursor->size = (MAX + 1) / 2;
-    newInternal->size = MAX - (MAX + 1) / 2;
+    cursor->size = (config::MAX + 1) / 2;
+    newInternal->size = config::MAX - (config::MAX + 1) / 2;
     for (i = 0, j = cursor->size + 1; i < newInternal->size; i++, j++) {
       newInternal->key[i] = virtualKey[j];
     }
@@ -270,9 +268,4 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
     }
   }
   return parent;
-}
-
-// Get the root
-Node *BPTree::getRoot() {
-  return root;
 }
