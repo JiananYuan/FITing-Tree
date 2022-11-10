@@ -33,6 +33,10 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vect
     if (i >= min_bound && i <= max_bound) {
       sl_high = (k_up - origin_loc) / (keys[i] - keys[origin_loc]);
       sl_low = (k_low - origin_loc) / (keys[i] - keys[origin_loc]);
+      if (i == keys.size() - 1) {
+          double slope = (i - origin_loc) / (keys[i] - keys[origin_loc]);
+          segs.emplace_back(Segment(slope, keys[origin_loc]));
+      }
     }
     else {
       double slope = ((i - 1) - origin_loc) / (keys[i - 1] - keys[origin_loc]);
