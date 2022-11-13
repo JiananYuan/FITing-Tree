@@ -54,10 +54,8 @@ double max_double(double d1, double d2) {
 }
 
 std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vector<int> buf) {
-  if (buf.size() != 0) {
-    keys.insert(keys.end(), buf.begin(), buf.end());
-    std::sort(keys.begin(), keys.end());
-  }
+  keys.insert(keys.end(), buf.begin(), buf.end());
+  std::sort(keys.begin(), keys.end());
   double sl_high = 1e9; // infinite
   double sl_low = 0;
   int origin_loc = 0;

@@ -12,11 +12,11 @@ using namespace std;
 using namespace chrono;
 
 int main() {
-    int k = 1;
+    int k = 100;
     srand((unsigned)time(nullptr));
     for (int i = 1; i <= config::N; i += 1) {
-        if (i % (config::N / 100) == 0) {
-            k += 1; // Segment-1%
+        if (i % (config::N / 10) == 0) {
+            k -= 9; // Segment-10%
         }
         underlying_data.push_back(k * i);  // 添加扰动
     }
