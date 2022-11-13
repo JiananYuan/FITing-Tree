@@ -31,6 +31,7 @@ public:
     void search(int);
     void insert(int);
     void construct();
+    void display(Node *cursor);
 };
 
 Node::Node() {
@@ -250,6 +251,7 @@ void BPTree::construct() {
     for (Segment seg : segs) {
         insert(seg.start);
     }
+    display(root);
     for (Segment seg : segs) {
         Node *cursor = root;
         while (cursor->IS_LEAF == false) {
@@ -267,4 +269,19 @@ void BPTree::construct() {
         // 抵达叶子节点, 使其指向下层的'线段节点'
         cursor->seg = &seg;
     }
+}
+
+// Print the tree
+void BPTree::display(Node *cursor) {
+  if (cursor != NULL) {
+    for (int i = 0; i < cursor->size; i++) {
+      cout << cursor->key[i] << " ";
+    }
+    cout << "\n";
+    if (cursor->IS_LEAF != true) {
+      for (int i = 0; i < cursor->size + 1; i++) {
+        display(cursor->ptr[i]);
+      }
+    }
+  }
 }
