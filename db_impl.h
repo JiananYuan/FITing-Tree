@@ -13,3 +13,7 @@ State get(int x) {
 State insert(int x) {
   return fiting_tree -> insert(x);
 }
+
+State construct() {
+    fiting_tree->construct();
+}

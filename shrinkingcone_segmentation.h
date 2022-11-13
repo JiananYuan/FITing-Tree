@@ -10,12 +10,33 @@ struct Segment {
     double slope;
     int start;
     std::vector<int> data;
+    std::vector<int> buf;
 
     Segment(double _slope, int _start, std::vector<int>& _data) {
         slope = _slope;
         start = _start;
         data.assign(_data.begin(), _data.end());
     }
+
+    void insert_buffer(int key) {  // 1 2 4 5  <-- (3)
+        int i = buf.size() - 1;
+        while (i >= 0 && buffer[i] > key) {
+            buffer[i + 1] = buffer[i];
+            i -= 1;
+        }
+        buffer[i + 1] = key;
+        buf_size += 1;
+    }
+
+    bool is_buffer_full() {
+        return buf.size() == config::BUFFER_SIZE;
+    }
+
+    int search_buffer(int x) {
+        int pos = lower_bound(pos.begin(), pos.end(), x) - pos.begin();
+        return buf[pos];
+    }
+
 };
 
 std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vector<int> buf) {
