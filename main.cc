@@ -7,7 +7,7 @@
 #include <chrono>
 #include "config.h"
 #include <random>
-#include <stdlib>
+#include <stdlib.h>
 using namespace std;
 using namespace chrono;
 
@@ -18,7 +18,7 @@ int main() {
         if (i % (config::N / 100) == 0) {
             k += 1; // Segment-1%
         }
-        underlying_data.push_back(k * i + rand() % config::ERROR);  // 添加扰动
+        underlying_data.push_back(k * i);  // 添加扰动
     }
     construct();
 
@@ -37,12 +37,13 @@ int main() {
     totle_time = 0;
     for (int i = 0; i < config::N; i += 1) {
         auto st = system_clock::now();
-        State s = get(i);
+        // State s = get(i);
+        get(i);
         auto en = system_clock::now();
         auto duration = duration_cast<microseconds>(en - st);
         totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-        if (s == State::SUCCESS) cout << "FOUND" << "\n";
-        else                     cout << "NOT FOUND" << "\n";
+        // if (s == State::SUCCESS) cout << "FOUND" << "\n";
+        // else                     cout << "NOT FOUND" << "\n";
     }
     cout << "read time: " << totle_time / config::N << "s\n";
     return 0;

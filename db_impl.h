@@ -6,12 +6,12 @@
 
 BPTree* fiting_tree = new BPTree;
 
-State get(int x) {
-  return fiting_tree -> search(x);
+void get(int x) {
+  fiting_tree -> search(x);
 }
 
-State insert(int x) {
-  return fiting_tree -> insert(x);
+void insert(int x) {
+  fiting_tree -> insert(x);
 }
 
 void construct() {
