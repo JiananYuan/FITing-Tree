@@ -32,6 +32,7 @@ public:
     void insert(int);
     void construct();
     void display(Node *cursor);
+    void display_seg();
 };
 
 Node::Node() {
@@ -60,6 +61,7 @@ void BPTree::search(int x) {
     // return State::FAIL;
   } else {
     Node *cursor = root;
+//      cout << "Lookup中结果: " << "\n";
     while (cursor->IS_LEAF == false) {
       for (int i = 0; i < cursor->size; i++) {
         if (x < cursor->key[i]) {
@@ -73,18 +75,15 @@ void BPTree::search(int x) {
       }
     }
     // 进入到叶子节点中，使用Segment算法
+    if (x < cursor->key[0]) {
+        cout << "NOT FOUND" << "\n";
+        return;
+    }
     int i = 0;
-    Node *target_child = cursor->ptr[0];
     for (; i < cursor->size; i++) {
         if (i == cursor->size - 1 || (x >= cursor->key[i] && x < cursor->key[i + 1])) {
-            target_child = cursor->ptr[i + 1];
             break;
         }
-    }
-    // 没改变, 说明在全部数据之前, 那就没找到
-    if (target_child == cursor->ptr[0]) {
-        cout << "FAILED" << "\n";
-        return;
     }
     Segment *seg = cursor->seg[i + 1];
     int pos = seg->slope * (x - seg->start);
@@ -256,18 +255,22 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
   return parent;
 }
 
+vector<Segment> underlying_segs;
+
 void BPTree::construct() {
     vector<int> _;
-    vector<Segment> segs = shrinkingcore_segmentation(underlying_data, _);
-    for (Segment seg : segs) {
+    _.resize(0);
+    underlying_segs = shrinkingcore_segmentation(underlying_data, _);
+    for (Segment seg : underlying_segs) {
+        // cout << "seg: " << seg.start << " " << seg.slope << "\n";
         insert(seg.start);
     }
-//    display(root);
-    for (Segment seg : segs) {
+    display(root);
+    for (int j = 0; j < underlying_segs.size(); j += 1) {
         Node *cursor = root;
         while (cursor->IS_LEAF == false) {
             for (int i = 0; i < cursor->size; i++) {
-                if (seg.start < cursor->key[i]) {
+                if (underlying_segs[j].start < cursor->key[i]) {
                     cursor = cursor->ptr[i];
                     break;
                 }
@@ -279,12 +282,14 @@ void BPTree::construct() {
         }
         // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
         for (int i = 0; i < cursor->size; i++) {
-            if (cursor->key[i] == seg.start) {
-                cursor->seg[i + 1] = &seg;
+            if (cursor->key[i] == underlying_segs[j].start) {
+                cursor->seg[i + 1] = &underlying_segs[j];
                 break;
             }
         }
     }
+//    cout << "Construct中结果: " << "\n";
+//    display_seg();
 }
 
 // Print the tree
@@ -302,3 +307,8 @@ void BPTree::display(Node *cursor) {
   }
 }
 
+void BPTree::display_seg() {
+    for (int j = 0; j < root->size; j += 1) {
+        cout << "seg: " << root->seg[j + 1]->start << " " << root->seg[j + 1]->slope << "\n";
+    }
+}
