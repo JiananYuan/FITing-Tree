@@ -14,6 +14,6 @@ State insert(int x) {
   return fiting_tree -> insert(x);
 }
 
-State construct() {
+void construct() {
     fiting_tree->construct();
 }

@@ -78,10 +78,10 @@ State BPTree::search(int x) {
       }
     }
     // 进入到叶子节点中，使用Segment算法
-    int pos = cursor->slope * (x - cursor->start);
+    Segment *seg = cursor->seg;
+    int pos = seg->slope * (x - seg->start);
     int l_bound = pos - config::ERROR;
     int r_bound = pos + config::ERROR;
-    Segment seg = cursor->seg;
     pos = std::lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x) - seg->data.begin();
     if (seg->data[pos] == x) {
       return State::SUCCESS;
@@ -245,7 +245,7 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
   return parent;
 }
 
-State BPTree::construct() {
+void BPTree::construct() {
     vector<int> _;
     vector<Segment> segs = shrinkingcore_segmentation(underlying_data, _);
     for (Segment seg : segs) {
@@ -265,6 +265,7 @@ State BPTree::construct() {
                 }
             }
         }
+        // 抵达叶子节点, 使其指向下层的'线段节点'
         cursor->seg = seg;
     }
 }
