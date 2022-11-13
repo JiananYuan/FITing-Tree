@@ -8,7 +8,7 @@ using namespace std;
 // BP node
 class Node {
   bool IS_LEAF;
-  int *key, size;
+  int *key, size, buf_size; // size: 卫星节点内部导航数据数量  buffer_size: 节点内部缓冲区数据数量
   Node **ptr;
   int start; // 起始key
   double slope;
@@ -18,6 +18,7 @@ class Node {
 
 public:
     Node();
+    ~Node();
     void insert_buffer(int);
     bool is_buffer_full();
 };
@@ -35,9 +36,22 @@ public:
 };
 
 Node::Node() {
+    size = 0;
+    buf_size = 0;
   key = new int[config::MAX];
   ptr = new Node *[config::MAX + 1];
+  for (int i = 0; i < config::MAX; i += 1) {
+    ptr[i] = nullptr;
+  }
   buffer.resize(config::BUFFER_SIZE);
+}
+
+Node::~Node() {
+    delete key;
+    for (int i = 0; i < config::MAX + 1; i += 1) {
+        delete ptr[i];
+    }
+    delete ptr;
 }
 
 BPTree::BPTree() {
@@ -48,7 +62,7 @@ BPTree::BPTree() {
 State BPTree::search(int x) {
   if (root == NULL) {
     cout << "Tree is empty\n";
-    return State::SUCCESS;
+    return State::FAIL;
   } else {
     Node *cursor = root;
     while (cursor->IS_LEAF == false) {
@@ -71,38 +85,31 @@ State BPTree::search(int x) {
     if (cursor->data[pos] == x) {
       return State::SUCCESS;
     }
-//    for (int i = 0; i < cursor->size; i++) {
-//      if (cursor->key[i] == x) {
-//        cout << "Found\n";
-//        return;
-//      }
-//    }
-//    cout << "Not found\n";
   }
   return State::FAIL;
 }
 
 void Node::insert_buffer(int key) {  // 1 2 4 5  <-- (3)
-  int i = size - 1;
+  int i = buf_size - 1;
   while (i >= 0 && buffer[i] > key) {
     buffer[i + 1] = buffer[i];
     i -= 1;
   }
   buffer[i + 1] = key;
-  size += 1;
+  buf_size += 1;
 }
 
 bool Node::is_buffer_full() {
-  return size == config::BUFFER_SIZE;
+  return buf_size == config::BUFFER_SIZE;
 }
 
 // Insert Operation
 State BPTree::insert(int x) {
   try {
     if (root == NULL) {
-    root = new Node;
-    root -> insert_buffer(x);
-    root->IS_LEAF = true;
+      root = new Node;
+      root -> insert_buffer(x);
+      root->IS_LEAF = true;
   } else {
     Node *cursor = root;
     Node *parent;
@@ -130,10 +137,68 @@ State BPTree::insert(int x) {
         newNode->slope = seg.slope;
         newNode->start = seg.start;
         newNode->IS_LEAF = true;
-        insertInternal(seg.start, parent, newNode);
+        newNode->data.assign(seg.data.begin(), seg.data.end());
+        if (cursor->size < config::MAX) {
+            cursor->key[cursor->size] = seg.start;
+            cursor->ptr[cursor->size + 1] = newNode;
+            cursor->size += 1;
+
+    //      int i = 0;
+    //      while (x > cursor->key[i] && i < cursor->size)
+    //        i++;
+    //      for (int j = cursor->size; j > i; j--) {
+    //        cursor->key[j] = cursor->key[j - 1];
+    //      }
+    //      cursor->key[i] = x;
+    //      cursor->size++;
+    //      cursor->ptr[cursor->size] = cursor->ptr[cursor->size - 1];
+    //      cursor->ptr[cursor->size - 1] = NULL;
+        }
+        else {
+    //      Node *newLeaf = new Node;
+    //      int virtualNode[MAX + 1];
+    //      for (int i = 0; i < MAX; i++) {
+    //        virtualNode[i] = cursor->key[i];
+    //      }
+    //      int i = 0, j;
+    //      while (x > virtualNode[i] && i < MAX)
+    //        i++;
+    //      for (int j = MAX + 1; j > i; j--) {
+    //        virtualNode[j] = virtualNode[j - 1];
+    //      }
+    //      virtualNode[i] = x;
+    //      newLeaf->IS_LEAF = true;
+    //      cursor->size = (MAX + 1) / 2;
+    //      newLeaf->size = MAX + 1 - (MAX + 1) / 2;
+    //      cursor->ptr[cursor->size] = newLeaf;
+    //      newLeaf->ptr[newLeaf->size] = cursor->ptr[MAX];
+    //      cursor->ptr[MAX] = NULL;
+    //      for (i = 0; i < cursor->size; i++) {
+    //        cursor->key[i] = virtualNode[i];
+    //      }
+    //      for (i = 0, j = cursor->size; i < newLeaf->size; i++, j++) {
+    //        newLeaf->key[i] = virtualNode[j];
+    //      }
+    //      if (cursor == root) {
+    //        Node *newRoot = new Node;
+    //        newRoot->key[0] = newLeaf->key[0];
+    //        newRoot->ptr[0] = cursor;
+    //        newRoot->ptr[1] = newLeaf;
+    //        newRoot->IS_LEAF = false;
+    //        newRoot->size = 1;
+    //        root = newRoot;
+    //      } else {
+    //        insertInternal(newLeaf->key[0], parent, newLeaf);
+    //      }
+
+
+//        insertInternal(seg.start, parent, newNode);
+        }
       }
       // tree.remove(cursor)
-      delete cursor;
+//      delete cursor;
+        cursor->data.resize(0);
+      cursor->buffer.resize(0);
     }
 
 
