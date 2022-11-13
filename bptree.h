@@ -12,7 +12,7 @@ class Node {
   bool IS_LEAF;
   int *key, size;
   Node **ptr;
-  Segment *seg;
+  Segment **seg;
   friend class BPTree;
 
 public:
@@ -38,9 +38,7 @@ Node::Node() {
     size = 0;
   key = new int[config::MAX];
   ptr = new Node *[config::MAX + 1];
-  for (int i = 0; i < config::MAX; i += 1) {
-    ptr[i] = nullptr;
-  }
+  seg = new Segment *[config::MAX + 1];
 }
 
 Node::~Node() {
@@ -75,7 +73,14 @@ void BPTree::search(int x) {
       }
     }
     // 进入到叶子节点中，使用Segment算法
-    Segment *seg = cursor->seg;
+    int i = 0;
+    for (; i < cursor->size; i++) {
+        if (i == cursor->size - 1 || (x >= cursor->key[i] && x < cursor->key[i + 1])) {
+            cursor = cursor->ptr[i + 1];
+            break;
+        }
+    }
+    Segment *seg = cursor->seg[i + 1];
     int pos = seg->slope * (x - seg->start);
     int l_bound = max_double(pos - config::ERROR, 0);
     int r_bound = pos + config::ERROR;
@@ -266,8 +271,12 @@ void BPTree::construct() {
                 }
             }
         }
-        // 抵达叶子节点, 使其指向下层的'线段节点'
-        cursor->seg = &seg;
+        // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
+        for (int i = 0; i < cursor->size; i++) {
+            if (cursor->key[i] == seg.start) {
+                cursor->seg[i + 1] = &seg;
+            }
+        }
     }
 }
 
@@ -285,3 +294,4 @@ void BPTree::display(Node *cursor) {
     }
   }
 }
+
