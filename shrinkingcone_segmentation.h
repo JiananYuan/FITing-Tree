@@ -16,6 +16,7 @@ struct Segment {
         slope = _slope;
         start = _start;
         data.assign(_data.begin(), _data.end());
+        buf.resize(config::BUFFER_SIZE);
     }
 
     void insert_buffer(int key) {  // 1 2 4 5  <-- (3)
@@ -33,8 +34,11 @@ struct Segment {
     }
 
     int search_buffer(int x) {
-        int pos = lower_bound(buf.begin(), buf.end(), x) - buf.begin();
-        return buf[pos];
+        if (buf.size() != 0) {
+            int pos = lower_bound(buf.begin(), buf.end(), x) - buf.begin();
+            return buf[pos];
+        }
+        return -1;
     }
 
 };

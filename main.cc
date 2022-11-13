@@ -34,17 +34,18 @@ int main() {
     // }
     // cout << "write time: " << totle_time / config::N << "s\n";
 
-    totle_time = 0;
-    for (int i = 0; i < config::N; i += 1) {
-        auto st = system_clock::now();
-        // State s = get(i);
-        get(i);
-        auto en = system_clock::now();
-        auto duration = duration_cast<microseconds>(en - st);
-        totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-        // if (s == State::SUCCESS) cout << "FOUND" << "\n";
-        // else                     cout << "NOT FOUND" << "\n";
-    }
-    cout << "read time: " << totle_time / config::N << "s\n";
+//    totle_time = 0;
+//    for (int i = 0; i < config::N; i += 1) {
+//        auto st = system_clock::now();
+//        // State s = get(i);
+//        get(i);
+//        auto en = system_clock::now();
+//        auto duration = duration_cast<microseconds>(en - st);
+//        totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+//        // if (s == State::SUCCESS) cout << "FOUND" << "\n";
+//        // else                     cout << "NOT FOUND" << "\n";
+//    }
+//    cout << "read time: " << totle_time / config::N << "s\n";
+    get(104);
     return 0;
 }

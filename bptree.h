@@ -74,11 +74,17 @@ void BPTree::search(int x) {
     }
     // 进入到叶子节点中，使用Segment算法
     int i = 0;
+    Node *target_child = cursor->ptr[0];
     for (; i < cursor->size; i++) {
         if (i == cursor->size - 1 || (x >= cursor->key[i] && x < cursor->key[i + 1])) {
-            cursor = cursor->ptr[i + 1];
+            target_child = cursor->ptr[i + 1];
             break;
         }
+    }
+    // 没改变, 说明在全部数据之前, 那就没找到
+    if (target_child == cursor->ptr[0]) {
+        cout << "FAILED" << "\n";
+        return;
     }
     Segment *seg = cursor->seg[i + 1];
     int pos = seg->slope * (x - seg->start);
@@ -256,7 +262,7 @@ void BPTree::construct() {
     for (Segment seg : segs) {
         insert(seg.start);
     }
-    display(root);
+//    display(root);
     for (Segment seg : segs) {
         Node *cursor = root;
         while (cursor->IS_LEAF == false) {
@@ -275,6 +281,7 @@ void BPTree::construct() {
         for (int i = 0; i < cursor->size; i++) {
             if (cursor->key[i] == seg.start) {
                 cursor->seg[i + 1] = &seg;
+                break;
             }
         }
     }
