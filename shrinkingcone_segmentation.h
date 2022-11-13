@@ -77,7 +77,7 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vect
       }
     }
     else {
-      double slope = ((i - 1) - origin_loc) / (keys[i - 1] - keys[origin_loc]);
+      double slope = 1.0 * ((i - 1) - origin_loc) / (keys[i - 1] - keys[origin_loc]);
       segs.emplace_back(Segment(slope, keys[origin_loc], data));
       origin_loc = i;
       sl_high = 1e9;

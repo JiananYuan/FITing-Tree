@@ -18,8 +18,6 @@ class Node {
 public:
     Node();
     ~Node();
-    void insert_buffer(int);
-    bool is_buffer_full();
 };
 
 // BP tree
@@ -78,7 +76,7 @@ void BPTree::search(int x) {
     // 进入到叶子节点中，使用Segment算法
     Segment *seg = cursor->seg;
     int pos = seg->slope * (x - seg->start);
-    int l_bound = pos - config::ERROR;
+    int l_bound = max_double(pos - config::ERROR, 0);
     int r_bound = pos + config::ERROR;
     pos = std::lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x) - seg->data.begin();
     if (seg->data[pos] == x) {
