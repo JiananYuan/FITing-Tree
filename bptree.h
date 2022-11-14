@@ -33,6 +33,7 @@ public:
     void construct();
     void display(Node *cursor);
     void display_seg();
+    void delta_insert(int);
 };
 
 Node::Node() {
@@ -76,7 +77,12 @@ void BPTree::search(int x) {
     }
     // 进入到叶子节点中，使用Segment算法
     if (x < cursor->key[0]) {
-        cout << "NOT FOUND" << "\n";
+        if (cursor->seg[0]->search_buffer(x) == x) {
+            cout << "FOUND" << "\n";
+        }
+        else {
+            cout << "NOT FOUND" << "\n";
+        }
         return;
     }
     int i = 0;
@@ -93,10 +99,12 @@ void BPTree::search(int x) {
     if (seg->data[pos] == x) {
     //   return State::SUCCESS;
         cout << "Found" << "\n";
+        return;
     }
     if (seg->search_buffer(x) == x) {
         // return State::SUCCESS;
         cout << "Found" << "\n";
+        return;
     }
   }
 //   return State::FAIL;
@@ -255,17 +263,15 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
   return parent;
 }
 
-vector<Segment> underlying_segs;
-
 void BPTree::construct() {
     vector<int> _;
     _.resize(0);
-    underlying_segs = shrinkingcore_segmentation(underlying_data, _);
+    static vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     for (Segment seg : underlying_segs) {
         // cout << "seg: " << seg.start << " " << seg.slope << "\n";
         insert(seg.start);
     }
-    display(root);
+//    display(root);
     for (int j = 0; j < underlying_segs.size(); j += 1) {
         Node *cursor = root;
         while (cursor->IS_LEAF == false) {
@@ -312,3 +318,67 @@ void BPTree::display_seg() {
         cout << "seg: " << root->seg[j + 1]->start << " " << root->seg[j + 1]->slope << "\n";
     }
 }
+
+void BPTree::delta_insert(int x) {
+    Node *cursor = root;
+    while (cursor->IS_LEAF == false) {
+      for (int i = 0; i < cursor->size; i++) {
+        if (x < cursor->key[i]) {
+          cursor = cursor->ptr[i];
+          break;
+        }
+        if (i == cursor->size - 1) {
+          cursor = cursor->ptr[i + 1];
+          break;
+        }
+      }
+    }
+
+    Segment *seg;
+    // 进入到叶子节点中，使用Segment算法
+    if (x < cursor->key[0]) {
+        seg = cursor->seg[0];
+    }
+    else {
+        int i = 0;
+        for (; i < cursor->size; i++) {
+            if (i == cursor->size - 1 || (x >= cursor->key[i] && x < cursor->key[i + 1])) {
+                break;
+            }
+        }
+        seg = cursor->seg[i + 1];
+    }
+    seg->insert_buffer(x);
+    if (seg->is_buffer_full()) {
+        static vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
+        for (Segment seg : segs) {
+            insert(seg.start);
+        }
+        for (int j = 0; j < segs.size(); j += 1) {
+            Node *cursor = root;
+            while (cursor->IS_LEAF == false) {
+                for (int i = 0; i < cursor->size; i++) {
+                    if (segs[j].start < cursor->key[i]) {
+                        cursor = cursor->ptr[i];
+                        break;
+                    }
+                    if (i == cursor->size - 1) {
+                        cursor = cursor->ptr[i + 1];
+                        break;
+                    }
+                }
+            }
+            // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
+            for (int i = 0; i < cursor->size; i++) {
+                if (cursor->key[i] == segs[j].start) {
+                    cursor->seg[i + 1] = &segs[j];
+                    break;
+                }
+            }
+        }
+        delete seg;
+    }
+}
+
+// TODO:
+// 1. 往seg[0]插入数据

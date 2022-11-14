@@ -41,6 +41,11 @@ struct Segment {
         return -1;
     }
 
+    ~Segment() {
+      data.resize(0);
+      buf.resize(0);
+    }
+
 };
 
 double min_double(double d1, double d2) {

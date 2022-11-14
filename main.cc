@@ -21,6 +21,7 @@ int main() {
         underlying_data.push_back(k * i);  // 添加扰动
     }
     construct();
+//    fiting_tree->display_seg();
 
     double totle_time = 0;
     // for (int i = 0; i < config::N; i += 1) {
@@ -46,6 +47,7 @@ int main() {
 //        // else                     cout << "NOT FOUND" << "\n";
 //    }
 //    cout << "read time: " << totle_time / config::N << "s\n";
-    get(100);
+    insert(1001);
+    get(1001);
     return 0;
 }
