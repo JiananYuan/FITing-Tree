@@ -77,7 +77,12 @@ void BPTree::search(int x) {
     }
     // 进入到叶子节点中，使用Segment算法
     if (x < cursor->key[0]) {
-        cout << "NOT FOUND" << "\n";
+        if (cursor->seg[0]->search_buffer(x) == x) {
+            cout << "FOUND" << "\n";
+        }
+        else {
+            cout << "NOT FOUND" << "\n";
+        }
         return;
     }
     int i = 0;
@@ -94,10 +99,12 @@ void BPTree::search(int x) {
     if (seg->data[pos] == x) {
     //   return State::SUCCESS;
         cout << "Found" << "\n";
+        return;
     }
     if (seg->search_buffer(x) == x) {
         // return State::SUCCESS;
         cout << "Found" << "\n";
+        return;
     }
   }
 //   return State::FAIL;
@@ -256,17 +263,15 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
   return parent;
 }
 
-vector<Segment> underlying_segs;
-
 void BPTree::construct() {
     vector<int> _;
     _.resize(0);
-    underlying_segs = shrinkingcore_segmentation(underlying_data, _);
+    static vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     for (Segment seg : underlying_segs) {
         // cout << "seg: " << seg.start << " " << seg.slope << "\n";
         insert(seg.start);
     }
-    display(root);
+//    display(root);
     for (int j = 0; j < underlying_segs.size(); j += 1) {
         Node *cursor = root;
         while (cursor->IS_LEAF == false) {
@@ -345,7 +350,7 @@ void BPTree::delta_insert(int x) {
     }
     seg->insert_buffer(x);
     if (seg->is_buffer_full()) {
-        vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
+        static vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
         for (Segment seg : segs) {
             insert(seg.start);
         }
@@ -374,3 +379,6 @@ void BPTree::delta_insert(int x) {
         delete seg;
     }
 }
+
+// TODO:
+// 1. 往seg[0]插入数据
