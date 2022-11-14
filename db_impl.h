@@ -11,7 +11,7 @@ void get(int x) {
 }
 
 void insert(int x) {
-  fiting_tree -> insert(x);
+  fiting_tree -> delta_insert(x);
 }
 
 void construct() {
