@@ -33,6 +33,7 @@ public:
     void construct();
     void display(Node *cursor);
     void display_seg();
+    void delta_insert(int);
 };
 
 Node::Node() {
@@ -310,5 +311,66 @@ void BPTree::display(Node *cursor) {
 void BPTree::display_seg() {
     for (int j = 0; j < root->size; j += 1) {
         cout << "seg: " << root->seg[j + 1]->start << " " << root->seg[j + 1]->slope << "\n";
+    }
+}
+
+void BPTree::delta_insert(int x) {
+    Node *cursor = root;
+    while (cursor->IS_LEAF == false) {
+      for (int i = 0; i < cursor->size; i++) {
+        if (x < cursor->key[i]) {
+          cursor = cursor->ptr[i];
+          break;
+        }
+        if (i == cursor->size - 1) {
+          cursor = cursor->ptr[i + 1];
+          break;
+        }
+      }
+    }
+
+    Segment *seg;
+    // 进入到叶子节点中，使用Segment算法
+    if (x < cursor->key[0]) {
+        seg = cursor->seg[0];
+    }
+    else {
+        int i = 0;
+        for (; i < cursor->size; i++) {
+            if (i == cursor->size - 1 || (x >= cursor->key[i] && x < cursor->key[i + 1])) {
+                break;
+            }
+        }
+        seg = cursor->seg[i + 1];
+    }
+    seg->insert_buffer(x);
+    if (seg->is_buffer_full()) {
+        vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
+        for (Segment seg : segs) {
+            insert(seg.start);
+        }
+        for (int j = 0; j < segs.size(); j += 1) {
+            Node *cursor = root;
+            while (cursor->IS_LEAF == false) {
+                for (int i = 0; i < cursor->size; i++) {
+                    if (segs[j].start < cursor->key[i]) {
+                        cursor = cursor->ptr[i];
+                        break;
+                    }
+                    if (i == cursor->size - 1) {
+                        cursor = cursor->ptr[i + 1];
+                        break;
+                    }
+                }
+            }
+            // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
+            for (int i = 0; i < cursor->size; i++) {
+                if (cursor->key[i] == segs[j].start) {
+                    cursor->seg[i + 1] = &segs[j];
+                    break;
+                }
+            }
+        }
+        delete seg;
     }
 }

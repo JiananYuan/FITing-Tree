@@ -46,6 +46,7 @@ int main() {
 //        // else                     cout << "NOT FOUND" << "\n";
 //    }
 //    cout << "read time: " << totle_time / config::N << "s\n";
-    get(100);
+    delta_insert(1001);
+    get(1001);
     return 0;
 }
