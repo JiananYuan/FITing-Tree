@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include "config.h"
+typedef long long ll;
 
 struct Segment {
     double slope;
@@ -35,7 +36,7 @@ struct Segment {
 
     int search_buffer(int x) {
         if (buf.size() != 0) {
-            int pos = lower_bound(buf.begin(), buf.end(), x) - buf.begin();
+            int pos = std::distance(bug.begin(), lower_bound(buf.begin(), buf.end(), x));
             return buf[pos];
         }
         return -1;
@@ -62,14 +63,15 @@ double max_double(double d1, double d2) {
   return d1;
 }
 
-std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vector<int> buf) {
+std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vector<ll>& buf) {
   keys.insert(keys.end(), buf.begin(), buf.end());
+  buf.resize(0);
   std::sort(keys.begin(), keys.end());
   double sl_high = 1e9; // infinite
   double sl_low = 0;
   int origin_loc = 0;
   std::vector<Segment> segs;
-  std::vector<int> data;
+  std::vector<ll> data;
   data.push_back(keys[0]);
   for (int i = 1; i < keys.size(); i += 1) {
     double k_up = i + config::ERROR;
@@ -83,6 +85,7 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vect
       if (i == keys.size() - 1) {
           double slope = (i - origin_loc) / (keys[i] - keys[origin_loc]);
           segs.emplace_back(Segment(slope, keys[origin_loc], data));
+          data.resize(0);
       }
     }
     else {
@@ -92,8 +95,17 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<int> keys, std::vect
       sl_high = 1e9;
       sl_low = 0;
       data.clear();
+      data.resize(0);
       data.push_back(keys[i]);
     }
+  }
+  if (!data.empty()) {
+      segs.emplace_back(Segment(0, keys[origin_loc], data));
+      data.resize(0);
+  }
+  for (int i = 0; i < segs.size(); i += 1) {
+      Segment& seg = segs[i];
+      cout << "seg" << i << ": " << seg.start << " slope: " << seg.slope << " data_range: (" << *(seg.data.begin()) << ", " << *(seg.data.end()) << ")" << "\n";
   }
   return segs;
 }

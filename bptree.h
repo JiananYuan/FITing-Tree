@@ -5,7 +5,9 @@
 #include "config.h"
 using namespace std;
 
-std::vector<int> underlying_data;
+typedef long long ll;
+
+std::vector<ll> underlying_data;
 
 // BP node
 class Node {
@@ -28,12 +30,12 @@ class BPTree {
 
 public:
     BPTree();
-    void search(int);
+    State search(int);
     void insert(int);
-    void construct();
+    State construct();
     void display(Node *cursor);
-    void display_seg();
-    void delta_insert(int);
+//    void display_seg();
+    State delta_insert(int);
 };
 
 Node::Node() {
@@ -56,10 +58,10 @@ BPTree::BPTree() {
 }
 
 // Search operation
-void BPTree::search(int x) {
+State BPTree::search(int x) {
   if (root == NULL) {
     cout << "Tree is empty\n";
-    // return State::FAIL;
+    return State::FAIL;
   } else {
     Node *cursor = root;
 //      cout << "Lookup中结果: " << "\n";
@@ -78,10 +80,10 @@ void BPTree::search(int x) {
     // 进入到叶子节点中，使用Segment算法
     if (x < cursor->key[0]) {
         if (cursor->seg[0]->search_buffer(x) == x) {
-            cout << "FOUND" << "\n";
+            return State::SUCCESS;
         }
         else {
-            cout << "NOT FOUND" << "\n";
+            return State::FAIL;
         }
         return;
     }
@@ -97,18 +99,13 @@ void BPTree::search(int x) {
     int r_bound = pos + config::ERROR;
     pos = std::lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x) - seg->data.begin();
     if (seg->data[pos] == x) {
-    //   return State::SUCCESS;
-        cout << "Found" << "\n";
-        return;
+       return State::SUCCESS;
     }
     if (seg->search_buffer(x) == x) {
-        // return State::SUCCESS;
-        cout << "Found" << "\n";
-        return;
+        return State::SUCCESS;
     }
   }
-//   return State::FAIL;
-    cout << "Not_Found" << "\n";
+   return State::FAIL;
 }
 
 // Insert Operation
@@ -263,12 +260,11 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
   return parent;
 }
 
-void BPTree::construct() {
+State BPTree::construct() {
     vector<int> _;
     _.resize(0);
     static vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     for (Segment seg : underlying_segs) {
-        // cout << "seg: " << seg.start << " " << seg.slope << "\n";
         insert(seg.start);
     }
 //    display(root);
@@ -296,6 +292,7 @@ void BPTree::construct() {
     }
 //    cout << "Construct中结果: " << "\n";
 //    display_seg();
+    return State::SUCCESS;
 }
 
 // Print the tree
@@ -313,13 +310,13 @@ void BPTree::display(Node *cursor) {
   }
 }
 
-void BPTree::display_seg() {
-    for (int j = 0; j < root->size; j += 1) {
-        cout << "seg: " << root->seg[j + 1]->start << " " << root->seg[j + 1]->slope << "\n";
-    }
-}
+//void BPTree::display_seg() {
+//    for (int j = 0; j < root->size; j += 1) {
+//        cout << "seg: " << root->seg[j + 1]->start << " " << root->seg[j + 1]->slope << "\n";
+//    }
+//}
 
-void BPTree::delta_insert(int x) {
+State BPTree::delta_insert(int x) {
     Node *cursor = root;
     while (cursor->IS_LEAF == false) {
       for (int i = 0; i < cursor->size; i++) {
@@ -378,6 +375,7 @@ void BPTree::delta_insert(int x) {
         }
         delete seg;
     }
+    return State::SUCCESS;
 }
 
 // TODO:

@@ -3,17 +3,18 @@
 //
 
 #include "bptree.h"
+#include "config.h"
 
 BPTree* fiting_tree = new BPTree;
 
-void get(int x) {
+State get(int x) {
   fiting_tree -> search(x);
 }
 
-void insert(int x) {
+State insert(int x) {
   fiting_tree -> delta_insert(x);
 }
 
-void construct() {
+State construct() {
     fiting_tree->construct();
 }

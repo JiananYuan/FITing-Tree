@@ -8,46 +8,50 @@
 #include "config.h"
 #include <random>
 #include <stdlib.h>
+#include <chrono>
 using namespace std;
 using namespace chrono;
+typedef long long ll;
 
-int main() {
-    int k = 100;
-    srand((unsigned)time(nullptr));
-    for (int i = 1; i <= config::N; i += 1) {
-        if (i % (config::N / 10) == 0) {
-            k -= 9; // Segment-10%
-        }
-        underlying_data.push_back(k * i);  // 添加扰动
+int main(int argc, char** argv) {
+    string PATH;
+    if (argc > 1) {
+        path = string(argc[1]);
     }
+    else {
+        cout << "no input file" << "\n";
+        exit(-1);
+    }
+    ifstream fp(path);
+    string line;
+    getline(fp, line);
+    while (getline(fp, line)) {
+        istringstream readstr(line);
+        string number;
+        getline(readstr, number, ',');
+        underlying_data.push_back(atoll(number.data()));
+    }
+    cout << "Finish Stage 1" << "\n";
+
     construct();
-//    fiting_tree->display_seg();
+    cout << "Finish Stage 2" << "\n";
 
     double totle_time = 0;
-    // for (int i = 0; i < config::N; i += 1) {
-    //     auto st = system_clock::now();
-    //     State s = insert(i);
-    //     auto en = system_clock::now();
-    //     auto duration = duration_cast<microseconds>(en - st);
-    //     totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-    //     if (s == State::SUCCESS) cout << "SUCCESS" << "\n";
-    //     else                     cout << "FAIL" << "\n";
-    // }
-    // cout << "write time: " << totle_time / config::N << "s\n";
-
-//    totle_time = 0;
-//    for (int i = 0; i < config::N; i += 1) {
-//        auto st = system_clock::now();
-//        // State s = get(i);
-//        get(i);
-//        auto en = system_clock::now();
-//        auto duration = duration_cast<microseconds>(en - st);
-//        totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-//        // if (s == State::SUCCESS) cout << "FOUND" << "\n";
-//        // else                     cout << "NOT FOUND" << "\n";
-//    }
-//    cout << "read time: " << totle_time / config::N << "s\n";
+    auto st = system_clock::now();
     insert(1001);
+    auto en = system_clock::now();
+    auto duration = duration_cast<microseconds>(en - st);
+    totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    cout << "insert latency: " << totle_time << "\n";
+    cout << "Finish Stage 3" << "\n";
+    totle_time = 0;
+
+    st = system_clock::now();
     get(1001);
+    en = system_clock::now();
+    duration = duration_cast<microseconds>(en - st);
+    totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    cout << "read latency: " << totle_time << "\n";
+    cout << "Finish Stage 4" << "\n";
     return 0;
 }
