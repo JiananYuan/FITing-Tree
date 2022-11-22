@@ -3,9 +3,11 @@
 #include <algorithm>
 #include <iostream>
 #include "config.h"
+#include <math.h>
 using namespace std;
 
 typedef long long ll;
+int Se;
 
 std::vector<ll> underlying_data;
 
@@ -36,6 +38,7 @@ public:
     void display(Node *cursor);
 //    void display_seg();
     State delta_insert(int);
+    int calculate_size(Node*);
 };
 
 Node::Node() {
@@ -82,10 +85,7 @@ State BPTree::search(int x) {
         if (cursor->seg[0]->search_buffer(x) == x) {
             return State::SUCCESS;
         }
-        else {
-            return State::FAIL;
-        }
-        return;
+        return State::FAIL;
     }
     int i = 0;
     for (; i < cursor->size; i++) {
@@ -261,38 +261,45 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
 }
 
 State BPTree::construct() {
-    vector<int> _;
+  try {
+    vector<ll> _;
     _.resize(0);
     static vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
+    Se = underlying_segs.size();
     for (Segment seg : underlying_segs) {
-        insert(seg.start);
+      insert(seg.start);
     }
-//    display(root);
+    // display(root);
     for (int j = 0; j < underlying_segs.size(); j += 1) {
-        Node *cursor = root;
-        while (cursor->IS_LEAF == false) {
-            for (int i = 0; i < cursor->size; i++) {
-                if (underlying_segs[j].start < cursor->key[i]) {
-                    cursor = cursor->ptr[i];
-                    break;
-                }
-                if (i == cursor->size - 1) {
-                    cursor = cursor->ptr[i + 1];
-                    break;
-                }
-            }
-        }
-        // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
+      Node *cursor = root;
+      while (cursor->IS_LEAF == false) {
         for (int i = 0; i < cursor->size; i++) {
-            if (cursor->key[i] == underlying_segs[j].start) {
-                cursor->seg[i + 1] = &underlying_segs[j];
-                break;
-            }
+          if (underlying_segs[j].start < cursor->key[i]) {
+            cursor = cursor->ptr[i];
+            break;
+          }
+          if (i == cursor->size - 1) {
+            cursor = cursor->ptr[i + 1];
+            break;
+          }
         }
+      }
+      // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
+      for (int i = 0; i < cursor->size; i++) {
+        if (cursor->key[i] == underlying_segs[j].start) {
+          cursor->seg[i + 1] = &underlying_segs[j];
+          break;
+        }
+      }
     }
-//    cout << "Construct中结果: " << "\n";
-//    display_seg();
+    // cout << "Construct中结果: " << "\n";
+    // display_seg();
     return State::SUCCESS;
+  } catch (exception& e) {
+    cout << e.what() << "\n";
+    return State::FAIL;
+  }
+  return State::FAIL;
 }
 
 // Print the tree
@@ -317,6 +324,7 @@ void BPTree::display(Node *cursor) {
 //}
 
 State BPTree::delta_insert(int x) {
+  try {
     Node *cursor = root;
     while (cursor->IS_LEAF == false) {
       for (int i = 0; i < cursor->size; i++) {
@@ -334,48 +342,73 @@ State BPTree::delta_insert(int x) {
     Segment *seg;
     // 进入到叶子节点中，使用Segment算法
     if (x < cursor->key[0]) {
-        seg = cursor->seg[0];
+      seg = cursor->seg[0];
     }
     else {
-        int i = 0;
-        for (; i < cursor->size; i++) {
-            if (i == cursor->size - 1 || (x >= cursor->key[i] && x < cursor->key[i + 1])) {
-                break;
-            }
+      int i = 0;
+      for (; i < cursor->size; i++) {
+        if (i == cursor->size - 1 || (x >= cursor->key[i] && x < cursor->key[i + 1])) {
+          break;
         }
-        seg = cursor->seg[i + 1];
+      }
+      seg = cursor->seg[i + 1];
     }
     seg->insert_buffer(x);
     if (seg->is_buffer_full()) {
-        static vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
-        for (Segment seg : segs) {
-            insert(seg.start);
-        }
-        for (int j = 0; j < segs.size(); j += 1) {
-            Node *cursor = root;
-            while (cursor->IS_LEAF == false) {
-                for (int i = 0; i < cursor->size; i++) {
-                    if (segs[j].start < cursor->key[i]) {
-                        cursor = cursor->ptr[i];
-                        break;
-                    }
-                    if (i == cursor->size - 1) {
-                        cursor = cursor->ptr[i + 1];
-                        break;
-                    }
-                }
+      static vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
+      for (Segment seg : segs) {
+        insert(seg.start);
+      }
+      for (int j = 0; j < segs.size(); j += 1) {
+        Node *cursor = root;
+        while (cursor->IS_LEAF == false) {
+          for (int i = 0; i < cursor->size; i++) {
+            if (segs[j].start < cursor->key[i]) {
+              cursor = cursor->ptr[i];
+              break;
             }
-            // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
-            for (int i = 0; i < cursor->size; i++) {
-                if (cursor->key[i] == segs[j].start) {
-                    cursor->seg[i + 1] = &segs[j];
-                    break;
-                }
+            if (i == cursor->size - 1) {
+              cursor = cursor->ptr[i + 1];
+              break;
             }
+          }
         }
-        delete seg;
+        // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
+        for (int i = 0; i < cursor->size; i++) {
+          if (cursor->key[i] == segs[j].start) {
+            cursor->seg[i + 1] = &segs[j];
+            break;
+          }
+        }
+      }
+      delete seg;
+      return State::SUCCESS;
     }
-    return State::SUCCESS;
+  } catch (exception& e) {
+    std::cout << e.what() << "\n";
+    return State::FAIL;
+  }
+  return State::FAIL;
+}
+
+int BPTree::calculate_size(Node *cursor) {
+  int size = 0;
+  if (cursor != NULL) {
+    size += sizeof(*cursor);
+    if (cursor->IS_LEAF != true) {
+      for (int i = 0; i < cursor->size + 1; i++) {
+        size += calculate_size(cursor->ptr[i]);
+      }
+    } else {
+      // Segment 索引部分仅包含两个参数：double, long long，计12个Byte
+      size += 16;
+    }
+  }
+  return size;
+}
+
+int get_latency() {
+  return config::C * (log2(Se) / log2(config::MAX) + log2(config::ERROR) + log2(config::BUFFER_SIZE));
 }
 
 // TODO:

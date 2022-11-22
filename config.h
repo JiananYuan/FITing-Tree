@@ -8,6 +8,7 @@ namespace config {
     // const int BASE = 10000000;
     const int N = 1 * BASE;
     const double ERROR = 100;
+    const int C = 50; // TODO: really 50?
 }
 
 enum State {

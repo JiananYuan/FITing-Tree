@@ -9,7 +9,7 @@ typedef long long ll;
 
 struct Segment {
     double slope;
-    int start;
+    ll start;
     std::vector<int> data;
     std::vector<int> buf;
 
@@ -36,7 +36,7 @@ struct Segment {
 
     int search_buffer(int x) {
         if (buf.size() != 0) {
-            int pos = std::distance(bug.begin(), lower_bound(buf.begin(), buf.end(), x));
+            int pos = std::distance(buf.begin(), lower_bound(buf.begin(), buf.end(), x));
             return buf[pos];
         }
         return -1;
@@ -105,7 +105,7 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
   }
   for (int i = 0; i < segs.size(); i += 1) {
       Segment& seg = segs[i];
-      cout << "seg" << i << ": " << seg.start << " slope: " << seg.slope << " data_range: (" << *(seg.data.begin()) << ", " << *(seg.data.end()) << ")" << "\n";
+      std::cout << "seg" << i << ": " << seg.start << " slope: " << seg.slope << " data_range: (" << *(seg.data.begin()) << ", " << *(seg.data.end()) << ")" << "\n";
   }
   return segs;
 }
