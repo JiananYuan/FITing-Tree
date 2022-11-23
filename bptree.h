@@ -410,6 +410,3 @@ int BPTree::calculate_size(Node *cursor) {
 int get_latency() {
   return config::C * (log2(Se) / log2(config::MAX) + log2(config::ERROR) + log2(config::BUFFER_SIZE));
 }
-
-// TODO:
-// 1. 往seg[0]插入数据
