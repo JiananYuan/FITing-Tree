@@ -10,17 +10,17 @@ typedef long long ll;
 struct Segment {
     double slope;
     ll start;
-    std::vector<int> data;
-    std::vector<int> buf;
+    std::vector<ll> data;
+    std::vector<ll> buf;
 
-    Segment(double _slope, int _start, std::vector<int>& _data) {
+    Segment(double _slope, ll _start, std::vector<ll>& _data) {
         slope = _slope;
         start = _start;
         data.assign(_data.begin(), _data.end());
         buf.resize(config::BUFFER_SIZE);
     }
 
-    void insert_buffer(int key) {  // 1 2 4 5  <-- (3)
+    void insert_buffer(ll key) {  // 1 2 4 5  <-- (3)
         int i = buf.size() - 1;
         buf.push_back(0);
         while (i >= 0 && buf[i] > key) {
@@ -34,7 +34,7 @@ struct Segment {
         return buf.size() == config::BUFFER_SIZE;
     }
 
-    int search_buffer(int x) {
+    int search_buffer(ll x) {
         if (buf.size() != 0) {
             int pos = std::distance(buf.begin(), lower_bound(buf.begin(), buf.end(), x));
             return buf[pos];

@@ -14,7 +14,8 @@ std::vector<ll> underlying_data;
 // BP node
 class Node {
   bool IS_LEAF;
-  int *key, size;
+  ll *key;
+  int size;
   Node **ptr;
   Segment **seg;
   friend class BPTree;
@@ -27,23 +28,24 @@ public:
 // BP tree
 class BPTree {
     Node *root;
-    void insertInternal(int, Node *, Node *);
+    void insertInternal(ll, Node *, Node *);
     Node *findParent(Node *, Node *);
 
 public:
     BPTree();
-    State search(int);
-    void insert(int);
-    State construct();
+    State search(ll);
+    void insert(ll);
+    State construct(const vector<ll>& underdata);
     void display(Node *cursor);
 //    void display_seg();
-    State delta_insert(int);
-    int calculate_size(Node*);
+    State delta_insert(ll);
+    int calculate_size();
+    int internal_calculate_size(Node*);
 };
 
 Node::Node() {
-    size = 0;
-  key = new int[config::MAX];
+  size = 0;
+  key = new ll[config::MAX];
   ptr = new Node *[config::MAX + 1];
   seg = new Segment *[config::MAX + 1];
 }
@@ -61,7 +63,7 @@ BPTree::BPTree() {
 }
 
 // Search operation
-State BPTree::search(int x) {
+State BPTree::search(ll x) {
   if (root == NULL) {
     cout << "Tree is empty\n";
     return State::FAIL;
@@ -109,7 +111,7 @@ State BPTree::search(int x) {
 }
 
 // Insert Operation
-void BPTree::insert(int x) {
+void BPTree::insert(ll x) {
     if (root == NULL) {
         root = new Node;
         root->key[0] = x;
@@ -144,7 +146,7 @@ void BPTree::insert(int x) {
             cursor->ptr[cursor->size - 1] = NULL;
         } else {
             Node *newLeaf = new Node;
-            int virtualNode[config::MAX + 1];
+            ll virtualNode[config::MAX + 1];
             for (int i = 0; i < config::MAX; i++) {
                 virtualNode[i] = cursor->key[i];
             }
@@ -183,7 +185,7 @@ void BPTree::insert(int x) {
 }
 
 // Insert Operation
-void BPTree::insertInternal(int x, Node *cursor, Node *child) {
+void BPTree::insertInternal(ll x, Node *cursor, Node *child) {
     if (cursor->size < config::MAX) {
         int i = 0;
         while (x > cursor->key[i] && i < cursor->size)
@@ -199,7 +201,7 @@ void BPTree::insertInternal(int x, Node *cursor, Node *child) {
         cursor->ptr[i + 1] = child;
     } else {
         Node *newInternal = new Node;
-        int virtualKey[config::MAX + 1];
+        ll virtualKey[config::MAX + 1];
         Node *virtualPtr[config::MAX + 2];
         for (int i = 0; i < config::MAX; i++) {
             virtualKey[i] = cursor->key[i];
@@ -260,10 +262,13 @@ Node *BPTree::findParent(Node *cursor, Node *child) {
   return parent;
 }
 
-State BPTree::construct() {
+State BPTree::construct(const vector<ll>& underdata) {
   try {
     vector<ll> _;
     _.resize(0);
+    underlying_data.clear();
+    underlying_data.resize(0);
+    underlying_data.assign(underdata.begin(), underdata.end());
     static vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     Se = underlying_segs.size();
     for (Segment seg : underlying_segs) {
@@ -299,7 +304,6 @@ State BPTree::construct() {
     cout << e.what() << "\n";
     return State::FAIL;
   }
-  return State::FAIL;
 }
 
 // Print the tree
@@ -323,7 +327,7 @@ void BPTree::display(Node *cursor) {
 //    }
 //}
 
-State BPTree::delta_insert(int x) {
+State BPTree::delta_insert(ll x) {
   try {
     Node *cursor = root;
     while (cursor->IS_LEAF == false) {
@@ -391,13 +395,13 @@ State BPTree::delta_insert(int x) {
   return State::FAIL;
 }
 
-int BPTree::calculate_size(Node *cursor) {
+int BPTree::internal_calculate_size(Node* cursor) {
   int size = 0;
   if (cursor != NULL) {
     size += sizeof(*cursor);
     if (cursor->IS_LEAF != true) {
       for (int i = 0; i < cursor->size + 1; i++) {
-        size += calculate_size(cursor->ptr[i]);
+        size += internal_calculate_size(cursor->ptr[i]);
       }
     } else {
       // Segment 索引部分仅包含两个参数：double, long long，计12个Byte
@@ -407,6 +411,10 @@ int BPTree::calculate_size(Node *cursor) {
   return size;
 }
 
-int get_latency() {
+int BPTree::calculate_size() {
+  return internal_calculate_size(root);
+}
+
+double get_latency() {
   return config::C * (log2(Se) / log2(config::MAX) + log2(config::ERROR) + log2(config::BUFFER_SIZE));
 }
