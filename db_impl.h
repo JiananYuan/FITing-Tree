@@ -2,6 +2,9 @@
 // Created by Jiananyuan on 2022/10/19.
 //
 
+#ifndef _DB_IMPL_H_
+#define _DB_IMPL_H_
+
 #include "bptree.h"
 #include "config.h"
 #include <limits.h>
@@ -67,3 +70,5 @@ int get_e(int op, double req, const vector<ll>& underdata) {
     }
     return -1;
 }
+
+#endif

@@ -2,6 +2,9 @@
 // Created by Jiananyuan on 2022/10/19.
 //
 
+#ifndef _SHRINKINGCORE_SEGMENTATION_H_
+#define _SHRINKINGCORE_SEGMENTATION_H_
+
 #include <vector>
 #include <algorithm>
 #include "config.h"
@@ -109,3 +112,5 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
   }
   return segs;
 }
+
+#endif

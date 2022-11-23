@@ -1,3 +1,6 @@
+#ifndef _BPTREE_H_
+#define _BPTREE_H_
+
 #include <vector>
 #include "shrinkingcone_segmentation.h"
 #include <algorithm>
@@ -418,3 +421,5 @@ int BPTree::calculate_size() {
 double get_latency() {
   return config::C * (log2(Se) / log2(config::MAX) + log2(config::ERROR) + log2(config::BUFFER_SIZE));
 }
+
+#endif
