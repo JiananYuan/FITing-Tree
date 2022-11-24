@@ -53,19 +53,23 @@ int main(int argc, char** argv) {
   cout << "[Stage 4]: 写过程..." << "\n";
   double totle_time = 0;
   auto st = system_clock::now();
-  insert(1001);
+  for (int i = 10001; i <= 20000; i += 1) {
+    insert(i);
+  }
   auto en = system_clock::now();
   auto duration = duration_cast<microseconds>(en - st);
   totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-  cout << "写时延: " << totle_time << "\n\n";
-  totle_time = 0;
+  cout << "写时延: " << totle_time / 10000 << "\n\n";
 
+  totle_time = 0;
   cout << "[Stage 5]: 读过程..." << "\n";
   st = system_clock::now();
-  get(1001);
+  for (int i = 0; i < 20000; i += 2) {
+    get(i);
+  }
   en = system_clock::now();
   duration = duration_cast<microseconds>(en - st);
   totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-  cout << "读时延: " << totle_time << "\n\n";
+  cout << "读时延: " << totle_time / 10000 << "\n\n";
   return 0;
 }

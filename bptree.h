@@ -128,7 +128,7 @@ State BPTree::search(ll x) {
     int pos = seg->slope * (x - seg->start);
     int l_bound = max_double(pos - config::ERROR, 0);
     int r_bound = pos + config::ERROR;
-    pos = std::lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x) - seg->data.begin();
+    pos = distance(seg->data.begin(), lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x));
     if (seg->data[pos] == x) {
       return State::SUCCESS;
     }
@@ -415,6 +415,7 @@ State BPTree::delta_insert(ll x) {
         }
       }
       delete seg;
+      seg = NULL;
       return State::SUCCESS;
     }
   } catch (exception& e) {
