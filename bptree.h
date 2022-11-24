@@ -43,15 +43,15 @@ public:
   int calculate_size();
   int internal_calculate_size(Node*);
   ~BPTree();
-  void internal_destruct(Node*);
+  void internal_destruct(Node*&);
   void destruct();
 };
 
 Node::Node() {
   size = 0;
-  key = new ll[config::FANOUT];
-  ptr = new Node *[config::FANOUT + 1];
-  seg = new Segment *[config::FANOUT + 1];
+  key = new ll[config::FANOUT]();
+  ptr = new Node *[config::FANOUT + 1]();
+  seg = new Segment *[config::FANOUT + 1]();
 }
 
 Node::~Node() {
@@ -59,26 +59,28 @@ Node::~Node() {
   for (int i = 0; i < config::FANOUT + 1; i += 1) {
     delete ptr[i];
     delete seg[i];
+    ptr[i] = NULL;
+    seg[i] = NULL;
   }
   delete ptr;
   delete seg;
+  ptr = NULL;
+  seg = NULL;
 }
 
 BPTree::BPTree() {
   root = NULL;
 }
 
-void BPTree::internal_destruct(Node* node) {
-  if (node == nullptr) {
-    return;
-  }
-  if (node->IS_LEAF) {
-    delete node;
+void BPTree::internal_destruct(Node*& node) {
+  if (node == NULL) {
     return;
   }
   for (int i = 0; i < config::FANOUT + 1; i += 1) {
     internal_destruct(node -> ptr[i]);
   }
+  delete node;
+  node = NULL;
 }
 
 BPTree::~BPTree() {
@@ -319,7 +321,7 @@ State BPTree::construct(const vector<ll>& underdata) {
       // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
       for (int i = 0; i < cursor->size; i++) {
         if (cursor->key[i] == underlying_segs[j].start) {
-          cursor->seg[i + 1] = &Segment(underlying_segs[j]);
+          cursor->seg[i + 1] = new Segment(underlying_segs[j]);
           break;
         }
       }
@@ -407,7 +409,7 @@ State BPTree::delta_insert(ll x) {
         // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
         for (int i = 0; i < cursor->size; i++) {
           if (cursor->key[i] == segs[j].start) {
-            cursor->seg[i + 1] = &Segment(segs[j]);
+            cursor->seg[i + 1] = new Segment(segs[j]);
             break;
           }
         }
