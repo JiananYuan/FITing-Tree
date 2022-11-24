@@ -23,6 +23,13 @@ struct Segment {
     buf.resize(config::BUFFER_SIZE);
   }
 
+  Segment(const Segment& s) {
+    slope = s.slope;
+    start = s.start;
+    data.assign(s.data.begin(), s.data.end());
+    buf.assign(s.buf.begin(), s.buf.end());
+  }
+
   void insert_buffer(ll key) {  // 1 2 4 5  <-- (3)
     int i = buf.size() - 1;
     buf.push_back(0);
@@ -73,7 +80,7 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
   double sl_high = 1e9; // infinite
   double sl_low = 0;
   int origin_loc = 0;
-  std::vector<Segment> segs;
+  std::vector<Segment> s_segs;
   std::vector<ll> data;
   data.push_back(keys[0]);
   for (int i = 1; i < keys.size(); i += 1) {
@@ -87,13 +94,13 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
       data.push_back(keys[i]);
       if (i == keys.size() - 1) {
         double slope = (i - origin_loc) / (keys[i] - keys[origin_loc]);
-        segs.emplace_back(Segment(slope, keys[origin_loc], data));
+        s_segs.emplace_back(Segment(slope, keys[origin_loc], data));
         data.resize(0);
       }
     }
     else {
       double slope = 1.0 * ((i - 1) - origin_loc) / (keys[i - 1] - keys[origin_loc]);
-      segs.emplace_back(Segment(slope, keys[origin_loc], data));
+      s_segs.emplace_back(Segment(slope, keys[origin_loc], data));
       origin_loc = i;
       sl_high = 1e9;
       sl_low = 0;
@@ -103,14 +110,14 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
     }
   }
   if (!data.empty()) {
-    segs.emplace_back(Segment(0, keys[origin_loc], data));
+    s_segs.emplace_back(Segment(0, keys[origin_loc], data));
     data.resize(0);
   }
-  for (int i = 0; i < segs.size(); i += 1) {
-    Segment& seg = segs[i];
+  for (int i = 0; i < s_segs.size(); i += 1) {
+    Segment& seg = s_segs[i];
     std::cout << "seg" << i << ": " << seg.start << " slope: " << seg.slope << " data_range: (" << *(seg.data.begin()) << ", " << *(seg.data.rbegin()) << ")" << "\n";
   }
-  return segs;
+  return s_segs;
 }
 
 #endif

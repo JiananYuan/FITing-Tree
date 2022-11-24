@@ -12,8 +12,6 @@ using namespace std;
 typedef long long ll;
 int Se;
 
-std::vector<ll> underlying_data;
-
 // BP node
 class Node {
   bool IS_LEAF;
@@ -295,11 +293,10 @@ State BPTree::construct(const vector<ll>& underdata) {
   try {
     vector<ll> _;
     _.resize(0);
-    underlying_data.clear();
-    underlying_data.resize(0);
-    underlying_data.assign(underdata.begin(), underdata.end());
+    vector<ll> underlying_data(underdata.begin(), underdata.end());
     destruct();
-    static vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
+    
+    vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     Se = underlying_segs.size();
     for (Segment seg : underlying_segs) {
       insert(seg.start);
@@ -322,7 +319,7 @@ State BPTree::construct(const vector<ll>& underdata) {
       // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
       for (int i = 0; i < cursor->size; i++) {
         if (cursor->key[i] == underlying_segs[j].start) {
-          cursor->seg[i + 1] = &underlying_segs[j];
+          cursor->seg[i + 1] = &Segment(underlying_segs[j]);
           break;
         }
       }
@@ -389,7 +386,7 @@ State BPTree::delta_insert(ll x) {
     }
     seg->insert_buffer(x);
     if (seg->is_buffer_full()) {
-      static vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
+      vector<Segment> segs = shrinkingcore_segmentation(seg->data, seg->buf);
       for (Segment seg : segs) {
         insert(seg.start);
       }
@@ -410,7 +407,7 @@ State BPTree::delta_insert(ll x) {
         // 抵达叶子节点, 找到合适的指针, 使其指向下层的'线段节点'
         for (int i = 0; i < cursor->size; i++) {
           if (cursor->key[i] == segs[j].start) {
-            cursor->seg[i + 1] = &segs[j];
+            cursor->seg[i + 1] = &Segment(segs[j]);
             break;
           }
         }
