@@ -23,13 +23,14 @@ State construct(const vector<ll>& underdata) {
   return fiting_tree->construct(underdata);
 }
 
-const int e[] = {10, 100, 1000};
+const int e[] = {1000, 100, 10};
 
 // 性能优先保障
 int performance_tradeoff(double Lreq, const vector<ll>& underdata) {
   int best_e = 0;
   int min_size = INT_MAX;
   for (int ei : e) {
+    config::ERROR = ei;
     construct(underdata);
     double latency = get_latency();
     if (latency < Lreq) {
@@ -48,6 +49,7 @@ int size_tradeoff(double Sreq, const vector<ll>& underdata) {
   int best_e = 0;
   int min_latency = INT_MAX;
   for (int ei : e) {
+    config::ERROR = ei;
     construct(underdata);
     int size = fiting_tree -> calculate_size();
     if (size < Sreq) {

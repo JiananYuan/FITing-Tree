@@ -44,25 +44,48 @@ public:
   State delta_insert(ll);
   int calculate_size();
   int internal_calculate_size(Node*);
+  ~BPTree();
+  void internal_destruct(Node*);
+  void destruct();
 };
 
 Node::Node() {
   size = 0;
-  key = new ll[config::MAX];
-  ptr = new Node *[config::MAX + 1];
-  seg = new Segment *[config::MAX + 1];
+  key = new ll[config::FANOUT];
+  ptr = new Node *[config::FANOUT + 1];
+  seg = new Segment *[config::FANOUT + 1];
 }
 
 Node::~Node() {
   delete key;
-  for (int i = 0; i < config::MAX + 1; i += 1) {
+  for (int i = 0; i < config::FANOUT + 1; i += 1) {
     delete ptr[i];
+    delete seg[i];
   }
   delete ptr;
+  delete seg;
 }
 
 BPTree::BPTree() {
   root = NULL;
+}
+
+void BPTree::internal_destruct(Node* node) {
+  if (node != nullptr && node->IS_LEAF) {
+    delete node;
+    return;
+  }
+  for (int i = 0; i < config::FANOUT + 1; i += 1) {
+    internal_destruct(node -> ptr[i]);
+  }
+}
+
+BPTree::~BPTree() {
+  internal_destruct(root);
+}
+
+void BPTree::destruct() {
+  internal_destruct(root);
 }
 
 // Search operation
@@ -136,7 +159,7 @@ void BPTree::insert(ll x) {
         }
       }
     }
-    if (cursor->size < config::MAX) {
+    if (cursor->size < config::FANOUT) {
       int i = 0;
       while (x > cursor->key[i] && i < cursor->size)
         i++;
@@ -149,23 +172,23 @@ void BPTree::insert(ll x) {
       cursor->ptr[cursor->size - 1] = NULL;
     } else {
       Node *newLeaf = new Node;
-      ll virtualNode[config::MAX + 1];
-      for (int i = 0; i < config::MAX; i++) {
+      ll virtualNode[config::FANOUT + 1];
+      for (int i = 0; i < config::FANOUT; i++) {
         virtualNode[i] = cursor->key[i];
       }
       int i = 0, j;
-      while (x > virtualNode[i] && i < config::MAX)
+      while (x > virtualNode[i] && i < config::FANOUT)
         i++;
-      for (int j = config::MAX + 1; j > i; j--) {
+      for (int j = config::FANOUT + 1; j > i; j--) {
         virtualNode[j] = virtualNode[j - 1];
       }
       virtualNode[i] = x;
       newLeaf->IS_LEAF = true;
-      cursor->size = (config::MAX + 1) / 2;
-      newLeaf->size = config::MAX + 1 - (config::MAX + 1) / 2;
+      cursor->size = (config::FANOUT + 1) / 2;
+      newLeaf->size = config::FANOUT + 1 - (config::FANOUT + 1) / 2;
       cursor->ptr[cursor->size] = newLeaf;
-      newLeaf->ptr[newLeaf->size] = cursor->ptr[config::MAX];
-      cursor->ptr[config::MAX] = NULL;
+      newLeaf->ptr[newLeaf->size] = cursor->ptr[config::FANOUT];
+      cursor->ptr[config::FANOUT] = NULL;
       for (i = 0; i < cursor->size; i++) {
         cursor->key[i] = virtualNode[i];
       }
@@ -189,7 +212,7 @@ void BPTree::insert(ll x) {
 
 // Insert Operation
 void BPTree::insertInternal(ll x, Node *cursor, Node *child) {
-    if (cursor->size < config::MAX) {
+    if (cursor->size < config::FANOUT) {
       int i = 0;
       while (x > cursor->key[i] && i < cursor->size)
         i++;
@@ -204,28 +227,28 @@ void BPTree::insertInternal(ll x, Node *cursor, Node *child) {
       cursor->ptr[i + 1] = child;
     } else {
       Node *newInternal = new Node;
-      ll virtualKey[config::MAX + 1];
-      Node *virtualPtr[config::MAX + 2];
-      for (int i = 0; i < config::MAX; i++) {
+      ll virtualKey[config::FANOUT + 1];
+      Node *virtualPtr[config::FANOUT + 2];
+      for (int i = 0; i < config::FANOUT; i++) {
         virtualKey[i] = cursor->key[i];
       }
-      for (int i = 0; i < config::MAX + 1; i++) {
+      for (int i = 0; i < config::FANOUT + 1; i++) {
         virtualPtr[i] = cursor->ptr[i];
       }
       int i = 0, j;
-      while (x > virtualKey[i] && i < config::MAX)
+      while (x > virtualKey[i] && i < config::FANOUT)
         i++;
-      for (int j = config::MAX + 1; j > i; j--) {
+      for (int j = config::FANOUT + 1; j > i; j--) {
         virtualKey[j] = virtualKey[j - 1];
       }
       virtualKey[i] = x;
-      for (int j = config::MAX + 2; j > i + 1; j--) {
+      for (int j = config::FANOUT + 2; j > i + 1; j--) {
         virtualPtr[j] = virtualPtr[j - 1];
       }
       virtualPtr[i + 1] = child;
       newInternal->IS_LEAF = false;
-      cursor->size = (config::MAX + 1) / 2;
-      newInternal->size = config::MAX - (config::MAX + 1) / 2;
+      cursor->size = (config::FANOUT + 1) / 2;
+      newInternal->size = config::FANOUT - (config::FANOUT + 1) / 2;
       for (i = 0, j = cursor->size + 1; i < newInternal->size; i++, j++) {
         newInternal->key[i] = virtualKey[j];
       }
@@ -272,13 +295,14 @@ State BPTree::construct(const vector<ll>& underdata) {
     underlying_data.clear();
     underlying_data.resize(0);
     underlying_data.assign(underdata.begin(), underdata.end());
+    destruct();
     static vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     Se = underlying_segs.size();
     for (Segment seg : underlying_segs) {
       insert(seg.start);
     }
     // display(root);
-    for (int j = 0; j < underlying_segs.size(); j += 1) {
+    for (int j = 0; j < Se; j += 1) {
       Node *cursor = root;
       while (cursor->IS_LEAF == false) {
         for (int i = 0; i < cursor->size; i++) {
@@ -419,7 +443,7 @@ int BPTree::calculate_size() {
 }
 
 double get_latency() {
-  return config::C * (log2(Se) / log2(config::MAX) + log2(config::ERROR) + log2(config::BUFFER_SIZE));
+  return config::C * (log2(Se) / log2(config::FANOUT) + log2(config::ERROR) + log2(config::BUFFER_SIZE));
 }
 
 #endif
