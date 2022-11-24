@@ -71,7 +71,10 @@ BPTree::BPTree() {
 }
 
 void BPTree::internal_destruct(Node* node) {
-  if (node != nullptr && node->IS_LEAF) {
+  if (node == nullptr) {
+    return;
+  }
+  if (node->IS_LEAF) {
     delete node;
     return;
   }
