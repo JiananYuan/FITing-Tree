@@ -21,12 +21,9 @@ vector<ll> under_data;
 
 int main(int argc, char** argv) {
   assert(argc == 3 + 1);
-  string PATH;
-  int op;  // 0: 性能优先  1: 存储优先
-  double req;  // 性能或存储限制
-  PATH = string(argv[1]);
-  op = atoi(argv[2]);
-  req = atoi(argv[3]);
+  string PATH = string(argv[1]);
+  int op = atoi(argv[2]);  // 0: 性能优先  1: 存储优先
+  double req = atoi(argv[3]);  // 性能或存储限制
 
   cout << "[Stage 1]: 从外部文件读取数据..." << "\n";
   ifstream fp(PATH);
@@ -45,6 +42,7 @@ int main(int argc, char** argv) {
   config::ERROR = get_e(op, req, under_data);
   assert(op == 0 || op == 1);
   assert(config::ERROR == 10 || config::ERROR == 100 || config::ERROR == 1000);
+//  config::ERROR = 1000;
   cout << "e值: " << config::ERROR << "\n\n";
 
   cout << "[Stage 3]: 建立FITing-tree..." << "\n\n";

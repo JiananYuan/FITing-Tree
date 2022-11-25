@@ -16,6 +16,12 @@ struct Segment {
   std::vector<ll> data;
   std::vector<ll> buf;
 
+  Segment() {
+    slope = 0;
+    start = 0;
+    buf.resize(config::BUFFER_SIZE);
+  }
+
   Segment(double _slope, ll _start, std::vector<ll>& _data) {
     slope = _slope;
     start = _start;

@@ -43,7 +43,7 @@ public:
   int calculate_size();
   int internal_calculate_size(Node*);
   ~BPTree();
-  void internal_destruct(Node*&);
+  void get_all_nodes(Node*, vector<Node*>&);
   void destruct();
 };
 
@@ -52,6 +52,7 @@ Node::Node() {
   key = new ll[config::FANOUT]();
   ptr = new Node *[config::FANOUT + 1]();
   seg = new Segment *[config::FANOUT + 1]();
+  seg[0] = new Segment;
 }
 
 Node::~Node() {
@@ -72,23 +73,41 @@ BPTree::BPTree() {
   root = NULL;
 }
 
-void BPTree::internal_destruct(Node*& node) {
-  if (node == NULL) {
-    return;
+void BPTree::get_all_nodes(Node* node, vector<Node*>& all_nodes) {
+//  if (node == NULL) {
+//    return;
+//  }
+//  for (int i = 0; i < config::FANOUT + 1; i += 1) {
+//    if (node -> ptr[i]) {
+//      internal_destruct(node -> ptr[i]);
+//    }
+//  }
+//  delete node;
+  if (node != NULL) {
+    if (!node->IS_LEAF) {
+      for (int i = 0; i < node->size + 1; i++) {
+        if (node->ptr[i]) {
+          all_nodes.push_back(node->ptr[i]);
+          get_all_nodes(node->ptr[i], all_nodes);
+        }
+      }
+    }
   }
-  for (int i = 0; i < config::FANOUT + 1; i += 1) {
-    internal_destruct(node -> ptr[i]);
-  }
-  delete node;
-  node = NULL;
 }
 
 BPTree::~BPTree() {
-  internal_destruct(root);
+  destruct();
+  root = NULL;
 }
 
 void BPTree::destruct() {
-  internal_destruct(root);
+  vector<Node*> all_nodes;
+  all_nodes.push_back(root);
+  get_all_nodes(root, all_nodes);
+  for (Node* p : all_nodes) {
+    delete p;
+  }
+  root = NULL;
 }
 
 // Search operation
@@ -175,7 +194,7 @@ void BPTree::insert(ll x) {
       cursor->ptr[cursor->size - 1] = NULL;
     } else {
       Node *newLeaf = new Node;
-      ll virtualNode[config::FANOUT + 1];
+      ll virtualNode[config::FANOUT + 2];
       for (int i = 0; i < config::FANOUT; i++) {
         virtualNode[i] = cursor->key[i];
       }
@@ -296,8 +315,9 @@ State BPTree::construct(const vector<ll>& underdata) {
     vector<ll> _;
     _.resize(0);
     vector<ll> underlying_data(underdata.begin(), underdata.end());
-    destruct();
-    
+    // destruct();
+    root = NULL;
+
     vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     Se = underlying_segs.size();
     for (Segment seg : underlying_segs) {
