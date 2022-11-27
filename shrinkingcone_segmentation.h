@@ -119,10 +119,10 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
     s_segs.emplace_back(Segment(0, keys[origin_loc], data));
     data.resize(0);
   }
-  for (int i = 0; i < s_segs.size(); i += 1) {
-    Segment& seg = s_segs[i];
-    std::cout << "seg" << i << ": " << seg.start << " slope: " << seg.slope << " data_range: (" << *(seg.data.begin()) << ", " << *(seg.data.rbegin()) << ")" << "\n";
-  }
+//  for (int i = 0; i < s_segs.size(); i += 1) {
+//    Segment& seg = s_segs[i];
+//    std::cout << "seg" << i << ": " << seg.start << " slope: " << seg.slope << " data_range: (" << *(seg.data.begin()) << ", " << *(seg.data.rbegin()) << ")" << "\n";
+//  }
   return s_segs;
 }
 

@@ -43,28 +43,36 @@ public:
   int calculate_size();
   int internal_calculate_size(Node*);
   ~BPTree();
-  void get_all_nodes(Node*, vector<Node*>&);
+  void internal_destruct(Node*);
   void destruct();
 };
 
 Node::Node() {
   size = 0;
   key = new ll[config::FANOUT]();
-  ptr = new Node *[config::FANOUT + 1]();
-  seg = new Segment *[config::FANOUT + 1]();
+  ptr = new Node* [config::FANOUT + 1]();
+  seg = new Segment* [config::FANOUT + 1]();
+  for (int i = 0; i < config::FANOUT + 1; i += 1) {
+    ptr[i] = NULL;
+    seg[i] = NULL;
+  }
   seg[0] = new Segment;
 }
 
 Node::~Node() {
   delete key;
-  for (int i = 0; i < config::FANOUT + 1; i += 1) {
-    delete ptr[i];
-    delete seg[i];
-    ptr[i] = NULL;
-    seg[i] = NULL;
+
+  for (int i = 0; i < size; i += 1) {
+    if (ptr[i] != NULL)  delete ptr[i];
+    if (seg[i] != NULL)  delete seg[i];
   }
-  delete ptr;
-  delete seg;
+  if (size > 0) {
+    if (ptr[size] != NULL)  delete ptr[size];
+    if (seg[size] != NULL)  delete seg[size];
+  }
+
+  if (ptr != NULL)  delete [] ptr;
+  if (seg != NULL)  delete [] seg;
   ptr = NULL;
   seg = NULL;
 }
@@ -73,40 +81,25 @@ BPTree::BPTree() {
   root = NULL;
 }
 
-void BPTree::get_all_nodes(Node* node, vector<Node*>& all_nodes) {
-//  if (node == NULL) {
-//    return;
-//  }
-//  for (int i = 0; i < config::FANOUT + 1; i += 1) {
-//    if (node -> ptr[i]) {
-//      internal_destruct(node -> ptr[i]);
-//    }
-//  }
-//  delete node;
-  if (node != NULL) {
-    if (!node->IS_LEAF) {
-      for (int i = 0; i < node->size + 1; i++) {
-        if (node->ptr[i]) {
-          all_nodes.push_back(node->ptr[i]);
-          get_all_nodes(node->ptr[i], all_nodes);
-        }
-      }
+void BPTree::internal_destruct(Node *node) {
+  if (node == NULL) {
+    return;
+  }
+  if (node -> IS_LEAF != true) {
+    for (int i = 0; i < node->size + 1; i += 1) {
+      internal_destruct(node -> ptr[i]);
     }
   }
+  delete node;
 }
 
 BPTree::~BPTree() {
   destruct();
-  root = NULL;
 }
 
 void BPTree::destruct() {
-  vector<Node*> all_nodes;
-  all_nodes.push_back(root);
-  get_all_nodes(root, all_nodes);
-  for (Node* p : all_nodes) {
-    delete p;
-  }
+  display(root);
+  internal_destruct(root);
   root = NULL;
 }
 
@@ -315,8 +308,7 @@ State BPTree::construct(const vector<ll>& underdata) {
     vector<ll> _;
     _.resize(0);
     vector<ll> underlying_data(underdata.begin(), underdata.end());
-    // destruct();
-    root = NULL;
+    destruct();
 
     vector<Segment> underlying_segs = shrinkingcore_segmentation(underlying_data, _);
     Se = underlying_segs.size();
@@ -346,8 +338,8 @@ State BPTree::construct(const vector<ll>& underdata) {
         }
       }
     }
-    // cout << "Construct中结果: " << "\n";
-    // display_seg();
+    // cout << "FITing-Tree内部节点: " << "\n";
+    // display(root);
     return State::SUCCESS;
   } catch (exception& e) {
     cout << e.what() << "\n";
