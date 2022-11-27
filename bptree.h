@@ -43,7 +43,7 @@ public:
   int calculate_size();
   int internal_calculate_size(Node*);
   ~BPTree();
-  void internal_destruct(Node*);
+  void internal_destruct(Node* &);
   void destruct();
 };
 
@@ -63,34 +63,35 @@ Node::~Node() {
   delete key;
 
   for (int i = 0; i < size; i += 1) {
-    if (ptr[i] != NULL)  delete ptr[i];
-    if (seg[i] != NULL)  delete seg[i];
+    if (ptr[i] != NULL)  delete ptr[i]; ptr[i] = NULL;
+    if (seg[i] != NULL)  delete seg[i]; seg[i] = NULL;
   }
-  if (size > 0) {
-    if (ptr[size] != NULL)  delete ptr[size];
-    if (seg[size] != NULL)  delete seg[size];
-  }
+  // 这一步不必要也不能加，因为在该步处理之前， 就已经达到该步的效果了
+  // 不可重复delete
+//  if (size > 0) {
+//    if (ptr[size] != NULL)  delete ptr[size]; ptr[size] = NULL;
+//    if (seg[size] != NULL)  delete seg[size]; ptr[size] = NULL;
+//  }
 
-  if (ptr != NULL)  delete [] ptr;
-  if (seg != NULL)  delete [] seg;
-  ptr = NULL;
-  seg = NULL;
+  if (ptr != NULL)  delete [] ptr; ptr = NULL;
+  if (seg != NULL)  delete [] seg; seg = NULL;
 }
 
 BPTree::BPTree() {
   root = NULL;
 }
 
-void BPTree::internal_destruct(Node *node) {
+void BPTree::internal_destruct(Node* &node) {
   if (node == NULL) {
     return;
   }
   if (node -> IS_LEAF != true) {
-    for (int i = 0; i < node->size + 1; i += 1) {
+    for (int i = node->size; i >= 0; i -= 1) {
       internal_destruct(node -> ptr[i]);
     }
   }
   delete node;
+  node = NULL;
 }
 
 BPTree::~BPTree() {
@@ -98,7 +99,7 @@ BPTree::~BPTree() {
 }
 
 void BPTree::destruct() {
-  display(root);
+//  display(root);
   internal_destruct(root);
   root = NULL;
 }
@@ -142,6 +143,7 @@ State BPTree::search(ll x) {
     int r_bound = pos + config::ERROR;
     pos = distance(seg->data.begin(), lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x));
     if (seg->data[pos] == x) {
+      cout << x << endl;
       return State::SUCCESS;
     }
     if (seg->search_buffer(x) == x) {
@@ -227,61 +229,61 @@ void BPTree::insert(ll x) {
 
 // Insert Operation
 void BPTree::insertInternal(ll x, Node *cursor, Node *child) {
-    if (cursor->size < config::FANOUT) {
-      int i = 0;
-      while (x > cursor->key[i] && i < cursor->size)
-        i++;
-      for (int j = cursor->size; j > i; j--) {
-        cursor->key[j] = cursor->key[j - 1];
-      }
-      for (int j = cursor->size + 1; j > i + 1; j--) {
-        cursor->ptr[j] = cursor->ptr[j - 1];
-      }
-      cursor->key[i] = x;
-      cursor->size++;
-      cursor->ptr[i + 1] = child;
-    } else {
-      Node *newInternal = new Node;
-      ll virtualKey[config::FANOUT + 1];
-      Node *virtualPtr[config::FANOUT + 2];
-      for (int i = 0; i < config::FANOUT; i++) {
-        virtualKey[i] = cursor->key[i];
-      }
-      for (int i = 0; i < config::FANOUT + 1; i++) {
-        virtualPtr[i] = cursor->ptr[i];
-      }
-      int i = 0, j;
-      while (x > virtualKey[i] && i < config::FANOUT)
-        i++;
-      for (int j = config::FANOUT + 1; j > i; j--) {
-        virtualKey[j] = virtualKey[j - 1];
-      }
-      virtualKey[i] = x;
-      for (int j = config::FANOUT + 2; j > i + 1; j--) {
-        virtualPtr[j] = virtualPtr[j - 1];
-      }
-      virtualPtr[i + 1] = child;
-      newInternal->IS_LEAF = false;
-      cursor->size = (config::FANOUT + 1) / 2;
-      newInternal->size = config::FANOUT - (config::FANOUT + 1) / 2;
-      for (i = 0, j = cursor->size + 1; i < newInternal->size; i++, j++) {
-        newInternal->key[i] = virtualKey[j];
-      }
-      for (i = 0, j = cursor->size + 1; i < newInternal->size + 1; i++, j++) {
-        newInternal->ptr[i] = virtualPtr[j];
-      }
-      if (cursor == root) {
-        Node *newRoot = new Node;
-        newRoot->key[0] = cursor->key[cursor->size];
-        newRoot->ptr[0] = cursor;
-        newRoot->ptr[1] = newInternal;
-        newRoot->IS_LEAF = false;
-        newRoot->size = 1;
-        root = newRoot;
-      } else {
-        insertInternal(cursor->key[cursor->size], findParent(root, cursor), newInternal);
-      }
+  if (cursor->size < config::FANOUT) {
+    int i = 0;
+    while (x > cursor->key[i] && i < cursor->size)
+      i++;
+    for (int j = cursor->size; j > i; j--) {
+      cursor->key[j] = cursor->key[j - 1];
     }
+    for (int j = cursor->size + 1; j > i + 1; j--) {
+      cursor->ptr[j] = cursor->ptr[j - 1];
+    }
+    cursor->key[i] = x;
+    cursor->size++;
+    cursor->ptr[i + 1] = child;
+  } else {
+    Node *newInternal = new Node;
+    ll virtualKey[config::FANOUT + 1];
+    Node *virtualPtr[config::FANOUT + 2];
+    for (int i = 0; i < config::FANOUT; i++) {
+      virtualKey[i] = cursor->key[i];
+    }
+    for (int i = 0; i < config::FANOUT + 1; i++) {
+      virtualPtr[i] = cursor->ptr[i];
+    }
+    int i = 0, j;
+    while (x > virtualKey[i] && i < config::FANOUT)
+      i++;
+    for (int j = config::FANOUT + 1; j > i; j--) {
+      virtualKey[j] = virtualKey[j - 1];
+    }
+    virtualKey[i] = x;
+    for (int j = config::FANOUT + 2; j > i + 1; j--) {
+      virtualPtr[j] = virtualPtr[j - 1];
+    }
+    virtualPtr[i + 1] = child;
+    newInternal->IS_LEAF = false;
+    cursor->size = (config::FANOUT + 1) / 2;
+    newInternal->size = config::FANOUT - (config::FANOUT + 1) / 2;
+    for (i = 0, j = cursor->size + 1; i < newInternal->size; i++, j++) {
+      newInternal->key[i] = virtualKey[j];
+    }
+    for (i = 0, j = cursor->size + 1; i < newInternal->size + 1; i++, j++) {
+      newInternal->ptr[i] = virtualPtr[j];
+    }
+    if (cursor == root) {
+      Node *newRoot = new Node;
+      newRoot->key[0] = cursor->key[cursor->size];
+      newRoot->ptr[0] = cursor;
+      newRoot->ptr[1] = newInternal;
+      newRoot->IS_LEAF = false;
+      newRoot->size = 1;
+      root = newRoot;
+    } else {
+      insertInternal(cursor->key[cursor->size], findParent(root, cursor), newInternal);
+    }
+  }
 }
 
 // Find the parent
