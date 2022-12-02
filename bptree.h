@@ -143,7 +143,7 @@ State BPTree::search(ll x) {
     int r_bound = pos + config::ERROR;
     pos = distance(seg->data.begin(), lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x));
     if (seg->data[pos] == x) {
-      cout << x << endl;
+      //cout << x << endl;
       return State::SUCCESS;
     }
     if (seg->search_buffer(x) == x) {

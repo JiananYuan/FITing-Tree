@@ -5,4 +5,5 @@ cmake_minimum_required (VERSION 2.8)
 project (FITing_Tree)
 
 # 指定生成目标
-add_executable(fiting_tree main.cc bptree.h db_impl.h shrinkingcone_segmentation.h)
+add_executable(main main.cc bptree.h db_impl.h shrinkingcone_segmentation.h)
+add_executable(main2 main2.cc bptree.h db_impl.h shrinkingcone_segmentation.h)

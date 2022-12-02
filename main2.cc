@@ -1,6 +1,6 @@
 //
 // Created by yuanj on 2022/11/6.
-// 测量时延和index大小
+// 测量吞吐量
 
 #include <iostream>
 #include "db_impl.h"
@@ -47,28 +47,38 @@ int main(int argc, char** argv) {
 
   cout << "[Stage 3]: 建立FITing-tree..." << "\n\n";
   construct(under_data);
-  cout << "索引大小" << getsize() << "\n\n";
 
   cout << "[Stage 4]: 写过程..." << "\n";
   double totle_time = 0;
-  auto st = system_clock::now();
-  for (int i = 100001; i <= 110000; i += 1) {
-    insert(i);
-  }
-  auto en = system_clock::now();
-  auto duration = duration_cast<microseconds>(en - st);
-  totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-  cout << "写时延: " << totle_time / 10000 << "\n\n";
+  ll cnt = 0;
+	for (ll i = 100001; ; i += 1) {
+		auto st = system_clock::now();
+		insert(i);
+		auto en = system_clock::now();
+		auto duration = duration_cast<microseconds>(en - st);
+		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+		if (totle_time > 1.0) {
+				break;
+		}
+		cnt += 1;
+	}
+  cout << "写吞吐量: " << cnt << "\n\n";
 
   totle_time = 0;
+	cnt = 0;
   cout << "[Stage 5]: 读过程..." << "\n";
-  st = system_clock::now();
-  for (int i = 0; i < 20000; i += 2) {
-    get(i);
-  }
-  en = system_clock::now();
-  duration = duration_cast<microseconds>(en - st);
-  totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-  cout << "读时延: " << totle_time / 10000 << "\n\n";
+  for (ll i = 1; ; i += 1) {
+		auto st = system_clock::now();
+		get(i);
+		auto en = system_clock::now();
+		auto duration = duration_cast<microseconds>(en - st);
+		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+		if (totle_time > 1.0) {
+				break;
+		}
+		cnt += 1;
+	}
+  cout << "读吞吐量: " << cnt << "\n\n";
+
   return 0;
 }

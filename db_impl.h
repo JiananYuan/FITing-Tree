@@ -23,6 +23,10 @@ State construct(const vector<ll>& underdata) {
   return fiting_tree->construct(underdata);
 }
 
+int getsize() {
+  return fiting_tree->calculate_size();
+}
+
 const int e[] = {1000, 100, 10};
 
 // 性能优先保障
