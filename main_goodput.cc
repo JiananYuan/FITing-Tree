@@ -35,25 +35,28 @@ int main(int argc, char** argv) {
     getline(readstr, number, ',');
     under_data.push_back(atoll(number.data()));
   }
-  cout << "数据规模: " << under_data.size() << "\n\n";
+  cout << "数据规模: " << under_data.size() << "\n";
 
   // 挑选e值
   // cout << "[Stage 2]: 使用Cost Model返回最佳e值..." << "\n";
   // config::ERROR = get_e(op, req, under_data);
   // assert(op == 0 || op == 1);
   // assert(config::ERROR == 10 || config::ERROR == 100 || config::ERROR == 1000);
-  config::ERROR = 100;
-  cout << "e值: " << config::ERROR << "\n\n";
+  cout << "e值: " << config::ERROR << "\n";
 
-  cout << "[Stage 3]: 建立FITing-tree..." << "\n\n";
+  cout << "[Stage 3]: 建立FITing-tree..." << "\n";
   construct(under_data);
 
-  cout << "[Stage 4]: 写过程..." << "\n";
+  default_random_engine e(255);
+  uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
+  uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size());
   double totle_time = 0;
-  ll cnt = 0;
-	for (ll i = 100001; ; i += 1) {
+	ll cnt = 0;
+  cout << "[Stage 4]: 读过程..." << "\n";
+  while (true) {
+    ll tk = uniform_dist_file(e);
 		auto st = system_clock::now();
-		insert(i);
+		get(tk);
 		auto en = system_clock::now();
 		auto duration = duration_cast<microseconds>(en - st);
 		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
@@ -62,14 +65,15 @@ int main(int argc, char** argv) {
 		}
 		cnt += 1;
 	}
-  cout << "写吞吐量: " << cnt << "\n\n";
+  cout << "读吞吐量: " << cnt << "\n";
 
+  cout << "[Stage 5]: 写过程..." << "\n";
   totle_time = 0;
-	cnt = 0;
-  cout << "[Stage 5]: 读过程..." << "\n";
-  for (ll i = 1; ; i += 1) {
+  cnt = 0;
+	while(true) {
+    ll tk = uniform_dist_file2(e);
 		auto st = system_clock::now();
-		get(i);
+		insert(tk);
 		auto en = system_clock::now();
 		auto duration = duration_cast<microseconds>(en - st);
 		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
@@ -78,7 +82,7 @@ int main(int argc, char** argv) {
 		}
 		cnt += 1;
 	}
-  cout << "读吞吐量: " << cnt << "\n\n";
+  cout << "写吞吐量: " << cnt << "\n";
 
   return 0;
 }
