@@ -56,13 +56,13 @@ int main(int argc, char** argv) {
   uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
   double totle_time = 0;
 	ll cnt = 0;
-  int op = 0;  // 概率操作, < 为读操作, > 为写操作
+  int rwop = 0;  // 概率操作, < 为读操作, > 为写操作
   srand((unsigned)time(nullptr));
   cout << "[Stage 4]: 混合读写..." << "\n";
 	while(true) {
-    op = rand() % 10;
+    rwop = rand() % 10;
     // 读操作
-    if (op < read_percentage * 10) {
+    if (rwop < read_percentage * 10) {
       ll tk = uniform_dist_file(e);
       auto st = system_clock::now();
       get(tk);
