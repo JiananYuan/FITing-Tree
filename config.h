@@ -2,8 +2,8 @@
 #define _CONFIG_H_
 
 namespace config {
-  const int FANOUT = 50;
-  const int BUFFER_SIZE = 50 + 1;
+  const int FANOUT = 30;
+  const int BUFFER_SIZE = 30 + 1;
   double ERROR = 240;
   const int C = 50;
   const int PERFORMANCE_FIRST = 0;

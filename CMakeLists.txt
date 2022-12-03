@@ -17,3 +17,4 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall")
 # 指定生成目标
 add_executable(main_latency main_latency.cc bptree.h db_impl.h shrinkingcone_segmentation.h)
 add_executable(main_goodput main_goodput.cc bptree.h db_impl.h shrinkingcone_segmentation.h)
+add_executable(main_workload main_workload.cc bptree.h db_impl.h shrinkingcone_segmentation.h)
