@@ -140,7 +140,7 @@ State BPTree::search(ll x) {
     Segment *seg = cursor->seg[i + 1];
     int pos = seg->slope * (x - seg->start);
     int l_bound = max_double(pos - config::ERROR, 0);
-    int r_bound = pos + config::ERROR;
+    int r_bound = min_double(pos + config::ERROR, seg->data.size());
     pos = distance(seg->data.begin(), lower_bound(seg->data.begin() + l_bound, seg->data.begin() + r_bound, x));
     if (seg->data[pos] == x) {
       //cout << x << endl;
