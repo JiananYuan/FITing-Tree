@@ -19,12 +19,14 @@ struct Segment {
   Segment() {
     slope = 0;
     start = 0;
+    buf.resize(config::BUFFER_SIZE);
   }
 
   Segment(double _slope, ll _start, std::vector<ll>& _data) {
     slope = _slope;
     start = _start;
     data.assign(_data.begin(), _data.end());
+    buf.resize(config::BUFFER_SIZE);
   }
 
   Segment(const Segment& s) {

@@ -49,9 +49,9 @@ public:
 
 Node::Node() {
   size = 0;
-  key = new ll[config::FANOUT]();
-  ptr = new Node* [config::FANOUT + 1]();
-  seg = new Segment* [config::FANOUT + 1]();
+  key = new ll[config::FANOUT];
+  ptr = new Node* [config::FANOUT + 1];
+  seg = new Segment* [config::FANOUT + 1];
   for (int i = 0; i < config::FANOUT + 1; i += 1) {
     ptr[i] = NULL;
     seg[i] = NULL;
