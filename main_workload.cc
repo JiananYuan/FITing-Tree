@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
   string PATH = string(argv[1]);
   int op = atoi(argv[2]);  // 0: 性能优先  1: 存储优先
   double req = atoi(argv[3]);  // 性能或存储限制
+  double read_percentage = atof(argv[4]);
+  double write_percentage = atof(argv[5]);
 
   cout << "[Stage 1]: 从外部文件读取数据..." << "\n";
   ifstream fp(PATH);
@@ -45,44 +47,43 @@ int main(int argc, char** argv) {
   cout << "e值: " << config::ERROR << "\n";
 
   cout << "[Stage 3]: 建立FITing-tree..." << "\n";
+  // vector<ll> first_in_data(under_data.begin(), under_data.begin() + int(under_data.size() * read_percentage));
+  // construct(first_in_data);
   construct(under_data);
 
   default_random_engine e(255);
-  uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
   uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size());
+  uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
   double totle_time = 0;
 	ll cnt = 0;
-  cout << "[Stage 4]: 读过程..." << "\n";
-  while (true) {
-    ll tk = uniform_dist_file(e);
-		auto st = system_clock::now();
-		get(tk);
-		auto en = system_clock::now();
-		auto duration = duration_cast<microseconds>(en - st);
-		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-		if (totle_time > 1.0) {
-				break;
-		}
-		cnt += 1;
-	}
-  cout << "读吞吐量: " << cnt << "\n";
-
-  cout << "[Stage 5]: 写过程..." << "\n";
-  totle_time = 0;
-  cnt = 0;
+  int op = 0;  // 概率操作, < 为读操作, > 为写操作
+  srand((unsigned)time(nullptr));
+  cout << "[Stage 4]: 混合读写..." << "\n";
 	while(true) {
-    ll tk = uniform_dist_file2(e);
-		auto st = system_clock::now();
-		insert(tk);
-		auto en = system_clock::now();
-		auto duration = duration_cast<microseconds>(en - st);
-		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    op = rand() % 10;
+    // 读操作
+    if (op < read_percentage * 10) {
+      ll tk = uniform_dist_file(e);
+      auto st = system_clock::now();
+      get(tk);
+      auto en = system_clock::now();
+      auto duration = duration_cast<microseconds>(en - st);
+      totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    }
+    // 写操作
+    else {
+      ll tk = uniform_dist_file2(e);
+      auto st = system_clock::now();
+      insert(tk);
+      auto en = system_clock::now();
+      auto duration = duration_cast<microseconds>(en - st);
+      totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    }
 		if (totle_time > 1.0) {
 				break;
 		}
 		cnt += 1;
 	}
-  cout << "写吞吐量: " << cnt << "\n";
-
+  cout << "混合吞吐量: " << cnt << "\n";
   return 0;
 }

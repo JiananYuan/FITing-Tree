@@ -83,6 +83,5 @@ int main(int argc, char** argv) {
 		cnt += 1;
 	}
   cout << "写吞吐量: " << cnt << "\n";
-
   return 0;
 }
