@@ -2,4 +2,5 @@
 build/
 .vscode/
 cmake-build-debug/
+cmake-build-release/
 # dataset/
