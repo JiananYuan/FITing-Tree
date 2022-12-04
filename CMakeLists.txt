@@ -4,9 +4,11 @@ cmake_minimum_required (VERSION 2.8)
 # 项目信息
 project (FITing_Tree)
 
+set(CMAKE_CXX_STANDARD 14)
+
 # 编译指导
 if(NOT CMAKE_BUILD_TYPE)
-set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_CXX_FLAGS_RELEASE -Ofast)

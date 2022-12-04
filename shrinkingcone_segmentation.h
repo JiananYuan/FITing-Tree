@@ -83,7 +83,7 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
   keys.insert(keys.end(), buf.begin(), buf.end());
   buf.resize(0);
   std::sort(keys.begin(), keys.end());
-  double sl_high = 1e9; // infinite
+  double sl_high = 1e7; // infinite
   double sl_low = 0;
   int origin_loc = 0;
   std::vector<Segment> s_segs;
@@ -94,9 +94,13 @@ std::vector<Segment> shrinkingcore_segmentation(std::vector<ll>& keys, std::vect
     double k_low = i - config::ERROR;
     double max_bound = sl_high * keys[i];
     double min_bound = sl_low * keys[i];
-    if (i >= min_bound && i <= max_bound) {
-      sl_high = min_double((k_up - origin_loc) / (keys[i] - keys[origin_loc]), sl_high);
-      sl_low = max_double((k_low - origin_loc) / (keys[i] - keys[origin_loc]), sl_low);
+    if (k_up >= min_bound || k_low <= max_bound) {
+      if (k_up >= min_bound) {
+        sl_high = min_double((k_up - origin_loc) / (keys[i] - keys[origin_loc]), sl_high); 
+      }
+      if (k_low <= max_bound) {
+        sl_low = max_double((k_low - origin_loc) / (keys[i] - keys[origin_loc]), sl_low);
+      }
       data.push_back(keys[i]);
       if (i == keys.size() - 1) {
         double slope = (i - origin_loc) / (keys[i] - keys[origin_loc]);

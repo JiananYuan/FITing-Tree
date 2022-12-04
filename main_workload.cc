@@ -20,7 +20,6 @@ typedef long long ll;
 vector<ll> under_data;
 
 int main(int argc, char** argv) {
-  assert(argc == 3 + 1);
   string PATH = string(argv[1]);
   int op = atoi(argv[2]);  // 0: 性能优先  1: 存储优先
   double req = atoi(argv[3]);  // 性能或存储限制
@@ -52,7 +51,7 @@ int main(int argc, char** argv) {
   construct(under_data);
 
   default_random_engine e(255);
-  uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size());
+  uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size() - 1);
   uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
   double totle_time = 0;
 	ll cnt = 0;
