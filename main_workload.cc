@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
     // 读操作
     if (rwop < read_percentage * 10) {
       ll tk = uniform_dist_file(e);
+      tk = under_data[tk];
       auto st = system_clock::now();
       get(tk);
       auto en = system_clock::now();

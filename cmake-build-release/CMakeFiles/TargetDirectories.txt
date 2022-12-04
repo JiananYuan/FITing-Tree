@@ -1,0 +1,5 @@
+/home/yjn/Desktop/Index_homework/cmake-build-release/CMakeFiles/main_latency.dir
+/home/yjn/Desktop/Index_homework/cmake-build-release/CMakeFiles/main_goodput.dir
+/home/yjn/Desktop/Index_homework/cmake-build-release/CMakeFiles/main_workload.dir
+/home/yjn/Desktop/Index_homework/cmake-build-release/CMakeFiles/edit_cache.dir
+/home/yjn/Desktop/Index_homework/cmake-build-release/CMakeFiles/rebuild_cache.dir

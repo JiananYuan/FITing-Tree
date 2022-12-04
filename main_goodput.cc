@@ -48,13 +48,14 @@ int main(int argc, char** argv) {
   construct(under_data);
 
   default_random_engine e(255);
+  uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size() - 1);
   uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
-  uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size());
   double totle_time = 0;
 	ll cnt = 0;
   cout << "[Stage 4]: 读过程..." << "\n";
   while (true) {
     ll tk = uniform_dist_file(e);
+    tk = under_data[tk];
 		auto st = system_clock::now();
 		get(tk);
 		auto en = system_clock::now();

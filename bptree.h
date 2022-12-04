@@ -63,8 +63,14 @@ Node::~Node() {
   delete key;
 
   for (int i = 0; i < size; i += 1) {
-    if (ptr[i] != NULL)  delete ptr[i]; ptr[i] = NULL;
-    if (seg[i] != NULL)  delete seg[i]; seg[i] = NULL;
+    if (ptr[i] != NULL) {
+      delete ptr[i]; 
+      ptr[i] = NULL;
+    }
+    if (seg[i] != NULL) {
+      delete seg[i]; 
+      seg[i] = NULL;
+    }
   }
   // 这一步不必要也不能加，因为在该步处理之前， 就已经达到该步的效果了
   // 不可重复delete
@@ -73,8 +79,14 @@ Node::~Node() {
 //    if (seg[size] != NULL)  delete seg[size]; ptr[size] = NULL;
 //  }
 
-  if (ptr != NULL)  delete [] ptr; ptr = NULL;
-  if (seg != NULL)  delete [] seg; seg = NULL;
+  if (ptr != NULL) {
+    delete [] ptr; 
+    ptr = NULL;
+  }
+  if (seg != NULL) {
+    delete [] seg; 
+    seg = NULL;
+  }
 }
 
 BPTree::BPTree() {

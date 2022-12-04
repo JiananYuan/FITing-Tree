@@ -49,24 +49,31 @@ int main(int argc, char** argv) {
   cout << "索引大小" << getsize() << "\n";
 
   default_random_engine e(255);
+  uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size() - 1);
   uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
-  uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size());
   double totle_time = 0;
 
   cout << "[Stage 4]: 读过程..." << "\n";
   const int READ_SCALE = 10000;
+  vector<double> p99;
   for (int i = 1; i <= READ_SCALE; i += 1) {
     ll tk = uniform_dist_file(e);
+    tk = under_data[tk];
     auto st = system_clock::now();
     // cout << tk << "\n";
     get(tk);
     auto en = system_clock::now();
     auto duration = duration_cast<microseconds>(en - st);
-    totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    double ss = double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    p99.push_back(ss);
+    totle_time += ss;
   }
   cout << "读时延: " << totle_time / READ_SCALE << "\n";
+  std::sort(p99.begin(), p99.end());
+	cout << "p99读延迟: " << p99[int(READ_SCALE * 0.99)] << "\n";
 
   cout << "[Stage 5]: 写过程..." << "\n";
+  p99.clear();
   const int WRITE_SCALE = 1000;
   totle_time = 0;
   for (int i = 1; i <= WRITE_SCALE; i += 1) {
@@ -75,8 +82,12 @@ int main(int argc, char** argv) {
     insert(tk);
     auto en = system_clock::now();
     auto duration = duration_cast<microseconds>(en - st);
-    totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    double ss = double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    p99.push_back(ss);
+    totle_time += ss;
   }
   cout << "写时延: " << totle_time / WRITE_SCALE << "\n";
+  std::sort(p99.begin(), p99.end());
+	cout << "p99写延迟: " << p99[int(WRITE_SCALE * 0.99)] << "\n";
   return 0;
 }
