@@ -1,6 +1,6 @@
 # cmake -DCMAKE_BUILD_TYPE=Release ..
 
-dataset=(linear seg1 seg10 normal)
+dataset=(linear seg1 seg10 normal books_200M_uint64 fb_200M_uint64 osmc_200M_uint64 wiki_ts_200M_uint64)
 for ds in ${dataset[@]}
 do
     echo ">>>>>>>>>> $ds: 时延 <<<<<<<<<<"
@@ -35,7 +35,7 @@ do
 done
 
 # 实验准备
-# 1. 增加4个实验数据集：wiki_ts, books, osm_cellids, fb
-# 2. 增加工作负载的测试：写多读少(8:2)、读多写少(8:2)、读写均衡(1:1)，这种情况测吞吐量就好
+# done!! 1. 增加4个实验数据集：wiki_ts, books, osm_cellids, fb
+# done!! 2. 增加工作负载的测试：写多读少(8:2)、读多写少(8:2)、读写均衡(1:1)，这种情况测吞吐量就好
 # 3. 参数调整
-# 总结：读延迟、写延迟(可以画分布图)、读吞吐量、写吞吐量、索引空间大小、不同工作负载下的吞吐量(3组)
+# 总结：读延迟、写延迟(p99)、读吞吐量、写吞吐量、索引空间大小、不同工作负载下的吞吐量(3组)
