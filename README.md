@@ -1,5 +1,5 @@
 ## Intro
-This is an implementation of FITing-Tree written in C++. For the original SIGMOD '19 paper, see [FITing-Tree: A Data-aware Index Structure](https://dl.acm.org/doi/10.1145/3299869.3319860).
+This is an implementation(easy demo) of FITing-Tree written in C++. For the original SIGMOD '19 paper, see also [FITing-Tree: A Data-aware Index Structure](https://dl.acm.org/doi/10.1145/3299869.3319860).
 
 ## Install and Run
 - git clone this project and execute `mkdir build` in it
