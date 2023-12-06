@@ -2,11 +2,11 @@
 #define _BPTREE_H_
 
 #include <vector>
-#include "shrinkingcone_segmentation.h"
 #include <algorithm>
 #include <iostream>
-#include "config.h"
 #include <math.h>
+#include "shrinkingcone_segmentation.h"
+#include "config.h"
 using namespace std;
 
 typedef long long ll;

@@ -3,9 +3,7 @@
 // 测量吞吐量
 
 #include <iostream>
-#include "db_impl.h"
 #include <chrono>
-#include "config.h"
 #include <random>
 #include <stdlib.h>
 #include <chrono>
@@ -13,6 +11,8 @@
 #include <fstream>
 #include <vector>
 #include <assert.h>
+#include "../ATree/db_impl.h"
+#include "../ATree/config.h"
 
 using namespace std;
 using namespace chrono;
@@ -53,12 +53,12 @@ int main(int argc, char** argv) {
   default_random_engine e(255);
   uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size() - 1);
   uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
-  double totle_time = 0;
-	ll cnt = 0;
+  double total_time = 0;
+	ll cnt = 50000;
   int rwop = 0;  // 概率操作, < 为读操作, > 为写操作
   srand((unsigned)time(nullptr));
   cout << "[Stage 4]: 混合读写..." << "\n";
-	while(true) {
+	for (int i = 0; i < cnt; i += 1) {
     rwop = rand() % 10;
     // 读操作
     if (rwop < read_percentage * 10) {
@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
       get(tk);
       auto en = system_clock::now();
       auto duration = duration_cast<microseconds>(en - st);
-      totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+      total_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
     }
     // 写操作
     else {
@@ -77,13 +77,9 @@ int main(int argc, char** argv) {
       insert(tk);
       auto en = system_clock::now();
       auto duration = duration_cast<microseconds>(en - st);
-      totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+      total_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
     }
-		if (totle_time > 1.0) {
-				break;
-		}
-		cnt += 1;
 	}
-  cout << "混合吞吐量: " << cnt << "\n";
+  cout << "混合吞吐量: " << cnt / total_time << "\n";
   return 0;
 }

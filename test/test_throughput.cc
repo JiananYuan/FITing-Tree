@@ -3,9 +3,7 @@
 // 测量吞吐量
 
 #include <iostream>
-#include "db_impl.h"
 #include <chrono>
-#include "config.h"
 #include <random>
 #include <stdlib.h>
 #include <chrono>
@@ -13,6 +11,8 @@
 #include <fstream>
 #include <vector>
 #include <assert.h>
+#include "../ATree/db_impl.h"
+#include "../ATree/config.h"
 
 using namespace std;
 using namespace chrono;
@@ -50,39 +50,30 @@ int main(int argc, char** argv) {
   default_random_engine e(255);
   uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size() - 1);
   uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
-  double totle_time = 0;
-	ll cnt = 0;
+  double total_time = 0;
+	ll cnt = 50000;
   cout << "[Stage 4]: 读过程..." << "\n";
-  while (true) {
+  for (int i = 0; i < cnt; i += 1) {
     ll tk = uniform_dist_file(e);
     tk = under_data[tk];
 		auto st = system_clock::now();
 		get(tk);
 		auto en = system_clock::now();
 		auto duration = duration_cast<microseconds>(en - st);
-		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-		if (totle_time > 1.0) {
-				break;
-		}
-		cnt += 1;
+		total_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;  // 单位: s
 	}
-  cout << "读吞吐量: " << cnt << "\n";
+  cout << "读吞吐量: " << cnt / total_time << " ops/sec \n";
 
   cout << "[Stage 5]: 写过程..." << "\n";
-  totle_time = 0;
-  cnt = 0;
-	while(true) {
+  total_time = 0;
+	for (int i = 0; i < cnt; i += 1) {
     ll tk = uniform_dist_file2(e);
 		auto st = system_clock::now();
 		insert(tk);
 		auto en = system_clock::now();
 		auto duration = duration_cast<microseconds>(en - st);
-		totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
-		if (totle_time > 1.0) {
-				break;
-		}
-		cnt += 1;
+		total_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;  // 单位: s
 	}
-  cout << "写吞吐量: " << cnt << "\n";
+  cout << "写吞吐量: " << cnt / total_time << " ops/sec \n";
   return 0;
 }

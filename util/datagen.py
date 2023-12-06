@@ -4,10 +4,10 @@ import os
 import numpy as np
 
 def generate_data(_type, _n):
-    if os.path.exists('dataset') == False:
+    if os.path.exists('../demo_dataset') == False:
         print('path do not exist, create new directory!')
-        os.mkdir('dataset')
-    csv_path = 'dataset/' + _type + '.csv'
+        os.mkdir('../demo_dataset')
+    csv_path = '../demo_dataset/' + _type + '.csv'
     with open(csv_path, 'w', newline='') as f:
         writer = csv.writer(f)
         lst = []

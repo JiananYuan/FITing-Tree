@@ -5,9 +5,9 @@
 #ifndef _DB_IMPL_H_
 #define _DB_IMPL_H_
 
+#include <limits.h>
 #include "bptree.h"
 #include "config.h"
-#include <limits.h>
 typedef long long ll;
 BPTree* fiting_tree = new BPTree;
 
@@ -27,6 +27,7 @@ int getsize() {
   return fiting_tree->calculate_size();
 }
 
+// 网格搜索
 const int e[] = {1000, 100, 10};
 
 // 性能优先保障

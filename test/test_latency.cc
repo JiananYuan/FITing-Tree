@@ -3,9 +3,7 @@
 // 测量时延和index大小
 
 #include <iostream>
-#include "db_impl.h"
 #include <chrono>
-#include "config.h"
 #include <random>
 #include <stdlib.h>
 #include <chrono>
@@ -14,6 +12,9 @@
 #include <vector>
 #include <assert.h>
 #include <stdio.h>
+#include "../ATree/db_impl.h"
+#include "../ATree/config.h"
+
 using namespace std;
 using namespace chrono;
 typedef long long ll;
@@ -51,7 +52,7 @@ int main(int argc, char** argv) {
   default_random_engine e(255);
   uniform_int_distribution<uint64_t> uniform_dist_file(0, under_data.size() - 1);
   uniform_int_distribution<uint64_t> uniform_dist_file2(0, 1000000);
-  double totle_time = 0;
+  double total_time = 0;
 
   cout << "[Stage 4]: 读过程..." << "\n";
   const int READ_SCALE = 10000;
@@ -66,16 +67,16 @@ int main(int argc, char** argv) {
     auto duration = duration_cast<microseconds>(en - st);
     auto ns_d = duration_cast<nanoseconds>(en - st);
 		p99.push_back(double(ns_d.count()));
-    totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    total_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
   }
-  printf("读时延: %.15f\n", totle_time / READ_SCALE);
+  printf("读时延: %.15f s \n", total_time / READ_SCALE);
   std::sort(p99.begin(), p99.end());
-	printf("p99读延迟: %.15f\n", p99[int(READ_SCALE * 0.99)]);
+	printf("p99读延迟: %.15f s \n", p99[int(READ_SCALE * 0.99)]);
 
   cout << "[Stage 5]: 写过程..." << "\n";
   p99.clear();
   const int WRITE_SCALE = 3000;
-  totle_time = 0;
+  total_time = 0;
   for (int i = 1; i <= WRITE_SCALE; i += 1) {
     ll tk = uniform_dist_file2(e);
     auto st = system_clock::now();
@@ -84,10 +85,10 @@ int main(int argc, char** argv) {
     auto duration = duration_cast<microseconds>(en - st);
     auto ns_d = duration_cast<nanoseconds>(en - st);
 		p99.push_back(double(ns_d.count()));
-    totle_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
+    total_time += double(duration.count()) * microseconds::period::num / microseconds::period::den;
   }
-  printf("写时延: %.15f\n", totle_time / WRITE_SCALE);
+  printf("写时延: %.15f s \n", total_time / WRITE_SCALE);
   std::sort(p99.begin(), p99.end());
-	printf("p99写延迟: %.15f\n", p99[int(WRITE_SCALE * 0.99)]);
+	printf("p99写延迟: %.15f s \n", p99[int(WRITE_SCALE * 0.99)]);
   return 0;
 }
